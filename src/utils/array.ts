@@ -1,0 +1,1 @@
+export const isWithinBounds = (index: number, arr: any[]) => index >= 0 && index < arr.length;

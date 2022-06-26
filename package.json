@@ -1,0 +1,56 @@
+{
+	"name": "@dark-descent/editor",
+	"version": "0.1.0",
+	"main": "index.js",
+	"scripts": {
+		"start": "cross-env NODE_ENV=development electron dist/editor/main.js",
+		"watch": "cross-env NODE_ENV=development node config/watch",
+		"build": "cross-env NODE_ENV=development node config/build"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/dev-dmtrllv/dark-descent.git"
+	},
+	"keywords": [],
+	"author": "Dimitri Lilov",
+	"contributors": [
+		"Dimitri Lilov"
+	],
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/dark-descent/editor/issues"
+	},
+	"homepage": "https://github.com/dark-descent/editor#readme",
+	"devDependencies": {
+		"@types/node": "^18.0.0",
+		"@types/react": "^18.0.14",
+		"@types/react-dom": "^18.0.5",
+		"@types/webpack": "^5.28.0",
+		"@types/webpack-env": "^1.17.0",
+		"@webgpu/types": "^0.1.20",
+		"copy-webpack-plugin": "^11.0.0",
+		"cross-env": "^7.0.3",
+		"css-loader": "^6.7.1",
+		"electron": "^19.0.4",
+		"file-loader": "^6.2.0",
+		"find-process": "^1.4.7",
+		"html-webpack-plugin": "^5.5.0",
+		"mini-css-extract-plugin": "^2.6.1",
+		"node-sass": "^7.0.1",
+		"raw-loader": "^4.0.2",
+		"sass-loader": "^13.0.0",
+		"source-map-loader": "^4.0.0",
+		"style-loader": "^3.3.1",
+		"ts-loader": "^9.3.0",
+		"tsconfig-paths-webpack-plugin": "^3.5.2",
+		"typescript": "^4.7.3",
+		"url-loader": "^4.1.1",
+		"webpack": "^5.73.0"
+	},
+	"dependencies": {
+		"mobx": "^6.6.0",
+		"mobx-react": "^7.5.0",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
+	}
+}
