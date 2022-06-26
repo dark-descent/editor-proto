@@ -7,8 +7,12 @@ import { FlexBox, FlexItem, View } from "../views";
 
 import "./styles/panel-layout.scss";
 
-const PanelMenuItemComponent = observer<{ item: PanelMenuItem, onItemClick: (item: PanelMenuItem) => (e: React.MouseEvent) => void }>(({ item, onItemClick }) => 
+const PanelMenuItemComponent = observer<{ item: PanelMenuItem | "seperator", onItemClick: (item: PanelMenuItem) => (e: React.MouseEvent) => void }>(({ item, onItemClick }) => 
 {
+	if(item === "seperator")
+		return (
+			<View className="sep" />
+		);
 	return (
 		<View onClick={onItemClick(item)}>
 			{item.label}

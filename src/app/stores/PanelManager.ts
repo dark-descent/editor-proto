@@ -7,11 +7,11 @@ import { Store } from "./Store";
 type MenuItemProps = {
 	label: string;
 	onClick?: MenuItemClickHandler;
-	subMenu?: MenuItemProps[];
+	subMenu?: (MenuItemProps | "seperator")[];
 };
 
 type MenuProps = {
-	items: MenuItemProps[];
+	items: (MenuItemProps | "seperator")[];
 };
 
 export class PanelMenuItem
@@ -29,7 +29,7 @@ export class PanelMenuItem
 	private _onClick: MenuItemClickHandler | null;
 
 	@observable
-	private _subMenu: PanelMenuItem[] = [];
+	private _subMenu: (PanelMenuItem | "seperator")[] = [];
 
 	@computed
 	public get subMenu() { return this._subMenu; };
@@ -39,7 +39,7 @@ export class PanelMenuItem
 		this.menu = menu;
 		this._label = label;
 		this._onClick = onClick || null;
-		this._subMenu = subMenu.map(item => makeObservable(new PanelMenuItem(menu, item)));
+		this._subMenu = subMenu.map(item => typeof item === "string" ? item : makeObservable(new PanelMenuItem(menu, item))) as any;
 		this.parent = parent || null;
 	}
 
@@ -72,16 +72,12 @@ export class PanelMenu
 	@computed
 	public get items() { return this._items; }
 
-	private get defaultItems(): MenuItemProps[]
+	private get defaultItems(): (MenuItemProps | "seperator")[]
 	{
 		const manager = this.panel.item.manager;
 		const panels = manager.panels;
 
 		return [
-			{
-				label: "Close Panel",
-				onClick: () => { this.panel.item.parent?.removeChild(this.panel.item); }
-			},
 			...PanelMenu.insertPositions.map(pos => 
 			{
 				return {
@@ -98,16 +94,21 @@ export class PanelMenu
 						};
 					})
 				}
-			})
+			}),
+			"seperator",
+			{
+				label: "Close Panel",
+				onClick: () => { this.panel.item.parent?.removeChild(this.panel.item); }
+			},
 		];
 	}
 
-	public constructor(panel: Panel, items: MenuItemProps[] = [])
+	public constructor(panel: Panel, items: (MenuItemProps | "seperator")[] = [])
 	{
 		this.panel = panel;
 		this._items = [
-			...items.map(item => makeObservable(new PanelMenuItem(this, item))),
-			...this.defaultItems.map(item => makeObservable(new PanelMenuItem(this, item)))
+			...items.map(item => typeof item === "string" ? item : makeObservable(new PanelMenuItem(this, item))) as any,
+			...this.defaultItems.map(item => typeof item === "string" ? item : makeObservable(new PanelMenuItem(this, item)))
 		];
 	}
 }
