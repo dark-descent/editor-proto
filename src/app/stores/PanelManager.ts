@@ -65,6 +65,17 @@ export class PanelMenu
 
 export class Panel
 {
+	public static readonly create = (title: string, fc: React.FC<any>, menu?: MenuProps): PanelProps =>
+	{
+		const props: PanelProps = {
+			title,
+			fc
+		};
+		if (menu)
+			props.menu = menu;
+		return props;
+	}
+
 	public readonly menu: PanelMenu | null;
 
 	@observable
@@ -89,6 +100,8 @@ export class Panel
 
 export class PanelItem
 {
+	public readonly manager: PanelManager;
+
 	public readonly ref = React.createRef<HTMLDivElement>();
 
 	public get element(): HTMLDivElement
@@ -141,14 +154,16 @@ export class PanelItem
 			this.updatePanelInsertPosition(pos);
 	}
 
-	public constructor(child: PanelProps | PanelBoxProps, weight: Weight = "auto")
+	public constructor(manager: PanelManager, child: PanelProps | PanelBoxProps, weight: Weight = "auto")
 	{
+		this.manager = manager;
+
 		this._weight = weight;
 
 		if (PanelBox.isProps(child))
 		{
 			const box = new PanelBox(child.dir, this);
-			box.appendChild(...PanelBox.parseChildren(box, child.children));
+			box.appendChild(...PanelBox.parseChildren(manager, box, child.children));
 			this._child = makeObservable(box);
 		}
 		else
@@ -200,24 +215,40 @@ export class PanelItem
 export class PanelBox
 {
 	public static readonly is = (o: any): o is PanelBox => o instanceof PanelBox;
-	public static readonly isProps = (o: any): o is PanelBoxProps => ("dir" in o) && ("children" in o);
+	public static readonly isProps = (o: any): o is PanelBoxProps => typeof o === "object" && ("dir" in o) && ("children" in o);
 
-	public static readonly parseChildren = (box: PanelBox, children: PanelItemProps[], parsedChildren: PanelItem[] = []): PanelItem[] =>
+	public static readonly parseChildren = (manager: PanelManager, box: PanelBox, children: (PanelItemProps | string | ((PanelItemProps | string)[]))[], parsedChildren: PanelItem[] = []): PanelItem[] =>
 	{
 		children.forEach(props => 
 		{
-			if (PanelBox.isProps(props.child))
+			if(Array.isArray(props))
+			{
+				parsedChildren.push(makeObservable(new PanelItem(manager, {
+					children: props,
+					dir: box.dir === "horizontal" ? "vertical" : "horizontal"
+				})));
+			}
+			else if (typeof props === "string")
+			{
+				const itemProps = manager.getPanelProps(props);
+				parsedChildren.push(makeObservable(new PanelItem(manager, itemProps)));
+			}
+			else if (PanelBox.isProps(props.child))
 			{
 				if (props.child.dir === box.dir)
-					this.parseChildren(box, props.child.children, parsedChildren);
+					this.parseChildren(manager, box, props.child.children, parsedChildren);
 				else
-					parsedChildren.push(makeObservable(new PanelItem(props.child, props.weight)));
+					parsedChildren.push(makeObservable(new PanelItem(manager, props.child, props.weight)));
 			}
 			else
 			{
-				parsedChildren.push(makeObservable(new PanelItem(props.child, props.weight)));
+				const itemProps = manager.getPanelProps(props.child);
+				parsedChildren.push(makeObservable(new PanelItem(manager, itemProps, props.weight)));
 			}
 		});
+
+		if (!parsedChildren.find(c => c.weight === "auto"))
+			parsedChildren[parsedChildren.length - 1]!.weight = "auto";
 
 		return parsedChildren;
 	}
@@ -328,7 +359,7 @@ export class PanelBox
 				const lastChild = children[0]!;
 				const itemParent = this._parent;
 				const parent = itemParent?.parent;
-				
+
 				if (itemParent && parent)
 				{
 					const index = parent.children.indexOf(itemParent);
@@ -401,6 +432,19 @@ export class PanelBox
 @Store.preload
 export class PanelManager extends Store<PanelBoxProps>
 {
+	public static readonly createPanelMap = <Map extends PanelsMap>(panels: Map) => panels;
+
+	public static readonly createConfig = <Map extends PanelsMap>(panels: Map, dir: PanelBoxDir, layout: PanelLayoutConfig<keyof Map>): InitPanelManagerProps<Map, keyof Map> =>
+	{
+		return {
+			children: layout,
+			dir,
+			panels
+		};
+	};
+
+	private readonly panels: InitPanelManagerProps<any, any>["panels"] = {};
+
 	@observable
 	private _rootBox: PanelBox = makeObservable(new PanelBox("horizontal"));
 
@@ -419,10 +463,12 @@ export class PanelManager extends Store<PanelBoxProps>
 	@observable
 	private _slidingProps: SlidingProps | null = null;
 
-	protected override init({ children = [], dir = "horizontal" }: Partial<PanelBoxProps>): void 
+	protected override init({ children = [], dir = "horizontal", panels = {} }: Partial<InitPanelManagerProps<any, any>>): void 
 	{
+		Object.keys(panels).forEach(key => this.panels[key] = panels[key]!);
+
 		const box = new PanelBox(dir, null);
-		box.appendChild(...PanelBox.parseChildren(box, children));
+		box.appendChild(...PanelBox.parseChildren(this, box, children));
 		this._rootBox = makeObservable(box);
 	}
 
@@ -430,6 +476,14 @@ export class PanelManager extends Store<PanelBoxProps>
 	{
 		window.addEventListener("mouseup", this.onMouseUp);
 		window.addEventListener("mousemove", this.onMouseMove);
+	}
+
+	public readonly getPanelProps = (key: string) => 
+	{
+		const panelProps = this.panels[key];
+		if (!panelProps)
+			throw new Error(`Could not get panel props for ${key}!`);
+		return panelProps;
 	}
 
 	public readonly useStartDragMethod = (item: PanelItem) => React.useMemo(() => () => this.setDraggingItem(item), [item]);
@@ -653,7 +707,6 @@ export class PanelManager extends Store<PanelBoxProps>
 			}
 			else
 			{
-				console.log("remove child")
 				parent.removeChild(dragItem);
 
 				const targetParent = targetItem.parent;
@@ -662,10 +715,9 @@ export class PanelManager extends Store<PanelBoxProps>
 				{
 					if (targetParent.dir !== dragDir)
 					{
-						console.log("splitty")
 						const targetIndex = targetParent.children.indexOf(targetItem);
 
-						const item = new PanelItem({
+						const item = new PanelItem(this, {
 							dir: dragDir,
 							children: [],
 						});
@@ -677,22 +729,14 @@ export class PanelManager extends Store<PanelBoxProps>
 						else
 							box.appendChild(targetItem, dragItem);
 
-						// if(dragItem.weight !== "auto" && targetItem.weight !== "auto")
-						// targetItem.weight = "auto";
-
 						dragItem.weight = targetItem.weight = "auto";
 
 						targetParent.replaceChild(makeObservable(item), targetIndex);
-
-						// const p = item.parent?.parent?.parent;
-						// if (p && !p.children.find(c => c.weight === "auto"))
-						// p.children[p.children.length - 1]!.weight = "auto";
-
 					}
 					else
 					{
-						console.log("insert");
 						let targetIndex = targetParent.children.indexOf(targetItem);
+
 						if (dragPos === "bottom" || dragPos === "right")
 							targetIndex += 1;
 
@@ -718,13 +762,17 @@ export type PanelProps = {
 	menu?: MenuProps;
 };
 
-export type PanelBoxProps = {
+export type PanelBoxProps<K extends KeyType = string> = {
 	dir: PanelBoxDir;
-	children: PanelItemProps[];
+	children: (PanelItemProps<K> | K | ((PanelItemProps<K> | K)[]))[];
 };
 
-type PanelItemProps = {
-	child: PanelProps | PanelBoxProps;
+export type PanelType = {
+	name: string;
+};
+
+type PanelItemProps<K extends KeyType = string> = {
+	child: K | PanelBoxProps<K>;
 	weight?: number | "auto";
 };
 
@@ -738,3 +786,17 @@ type SlidingProps = {
 	mousePos: number;
 	resizeHandler: (e: MouseEvent, props: SlidingProps) => void;
 };
+
+type PanelsMap = {
+	[name: KeyType]: PanelProps;
+};
+
+export type InitPanelManagerProps<M extends PanelsMap, K extends KeyType> = {
+	panels: M;
+	dir: PanelBoxDir;
+	children: PanelLayoutConfig<K>;
+};
+
+type PanelLayoutConfig<K extends KeyType> = (PanelItemProps<K> | K | ((PanelItemProps<K> | K)[]))[];
+
+type KeyType = string | number | symbol;
