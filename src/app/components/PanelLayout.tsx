@@ -7,9 +7,29 @@ import { FlexBox, FlexItem, View } from "../views";
 
 import "./styles/panel-layout.scss";
 
+const PanelMenuItemComponent = observer<{ item: PanelMenuItem, onItemClick: (item: PanelMenuItem) => (e: React.MouseEvent) => void }>(({ item, onItemClick }) => 
+{
+	return (
+		<View onClick={onItemClick(item)}>
+			{item.label}
+			{item.subMenu.length > 0 && (
+				<View className="sub-menu">
+					{item.subMenu.map((item, i) => <PanelMenuItemComponent key={i} item={item} onItemClick={onItemClick} />)}
+				</View>
+			)}
+		</View>
+	);
+})
+
 const PanelMenuCommponent = observer<{ menu: PanelMenu }>(({ menu }) => 
 {
-	const [isOpen, setIsOpen] = React.useState(false);
+	const [isOpen, _setIsOpen] = React.useState(false);
+
+	const setIsOpen = (_isOpen: boolean) =>
+	{
+		menu.isOpenRef = _isOpen;
+		_setIsOpen(_isOpen);
+	}
 
 	const setIsOpenRef = React.useRef(setIsOpen);
 
@@ -40,14 +60,7 @@ const PanelMenuCommponent = observer<{ menu: PanelMenu }>(({ menu }) =>
 				<View absolute centered />
 			</View>
 			<View className="menu" absolute>
-				{menu.items.map((item, i) => 
-				{
-					return (
-						<View key={i} onClick={onItemClick(item)}>
-							{item.label}
-						</View>
-					);
-				})}
+				{menu.items.map((item, i) => <PanelMenuItemComponent key={i} item={item} onItemClick={onItemClick} />)}
 			</View>
 		</View>
 	)

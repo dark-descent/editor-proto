@@ -6,7 +6,8 @@ import { Store } from "./Store";
 
 type MenuItemProps = {
 	label: string;
-	onClick: MenuItemClickHandler;
+	onClick?: MenuItemClickHandler;
+	subMenu?: MenuItemProps[];
 };
 
 type MenuProps = {
@@ -16,6 +17,7 @@ type MenuProps = {
 export class PanelMenuItem
 {
 	public readonly menu: PanelMenu;
+	public readonly parent: PanelMenuItem | null;
 
 	@observable
 	private _label: string;
@@ -24,20 +26,28 @@ export class PanelMenuItem
 	public get label() { return this._label; }
 
 	@observable
-	private _onClick: MenuItemClickHandler;
+	private _onClick: MenuItemClickHandler | null;
 
-	public constructor(menu: PanelMenu, { label, onClick }: MenuItemProps)
+	@observable
+	private _subMenu: PanelMenuItem[] = [];
+
+	@computed
+	public get subMenu() { return this._subMenu; };
+
+	public constructor(menu: PanelMenu, { label, onClick, subMenu = [] }: MenuItemProps, parent?: PanelMenuItem)
 	{
 		this.menu = menu;
 		this._label = label;
-		this._onClick = onClick;
+		this._onClick = onClick || null;
+		this._subMenu = subMenu.map(item => makeObservable(new PanelMenuItem(menu, item)));
+		this.parent = parent || null;
 	}
 
 	public readonly onClick = (e: React.MouseEvent) => 
 	{
 		e.preventDefault();
 		e.stopPropagation();
-		this._onClick(this);
+		this._onClick && this._onClick(this);
 	};
 
 	@action
@@ -51,15 +61,54 @@ type MenuItemClickHandler = (item: PanelMenuItem) => any;
 
 export class PanelMenu
 {
+	private static readonly insertPositions: Omit<PanelInsertPosition, "center" | "none">[] = ["left", "top", "right", "bottom"];
+
+	public isOpenRef: boolean = false;
+	public readonly panel: Panel;
+
 	@observable
 	private _items: PanelMenuItem[];
 
 	@computed
 	public get items() { return this._items; }
 
-	public constructor(items: MenuItemProps[] = [])
+	private get defaultItems(): MenuItemProps[]
 	{
-		this._items = items.map(item => makeObservable(new PanelMenuItem(this, item)));
+		const manager = this.panel.item.manager;
+		const panels = manager.panels;
+
+		return [
+			{
+				label: "Close Panel",
+				onClick: () => { this.panel.item.parent?.removeChild(this.panel.item); }
+			},
+			...PanelMenu.insertPositions.map(pos => 
+			{
+				return {
+					label: `insert ${pos}...`,
+					subMenu: Object.keys(panels).map(name => 
+					{
+						return {
+							label: name,
+							onClick: () =>
+							{
+								const insertItem = makeObservable(new PanelItem(manager, manager.getPanelProps(name), "auto"));
+								this.panel.item.parent?.boxChild(manager, this.panel.item, insertItem, pos as any);
+							}
+						};
+					})
+				}
+			})
+		];
+	}
+
+	public constructor(panel: Panel, items: MenuItemProps[] = [])
+	{
+		this.panel = panel;
+		this._items = [
+			...items.map(item => makeObservable(new PanelMenuItem(this, item))),
+			...this.defaultItems.map(item => makeObservable(new PanelMenuItem(this, item)))
+		];
 	}
 }
 
@@ -76,7 +125,8 @@ export class Panel
 		return props;
 	}
 
-	public readonly menu: PanelMenu | null;
+	public readonly item: PanelItem;
+	public readonly menu: PanelMenu;
 
 	@observable
 	private _title: string
@@ -90,11 +140,12 @@ export class Panel
 	@computed
 	public get Body() { return this._fc; }
 
-	public constructor(title: string, fc: React.FC<any>, menu: MenuProps | null = null)
+	public constructor(item: PanelItem, title: string, fc: React.FC<any>, menu: MenuProps | null = null)
 	{
+		this.item = item;
 		this._title = title;
 		this._fc = fc;
-		this.menu = menu && makeObservable(new PanelMenu(menu.items));
+		this.menu = makeObservable(new PanelMenu(this, menu?.items));
 	}
 }
 
@@ -168,7 +219,7 @@ export class PanelItem
 		}
 		else
 		{
-			this._child = makeObservable(new Panel(child.title, child.fc, child.menu));
+			this._child = makeObservable(new Panel(this, child.title, child.fc, child.menu));
 		}
 	};
 
@@ -221,7 +272,7 @@ export class PanelBox
 	{
 		children.forEach(props => 
 		{
-			if(Array.isArray(props))
+			if (Array.isArray(props))
 			{
 				parsedChildren.push(makeObservable(new PanelItem(manager, {
 					children: props,
@@ -248,7 +299,11 @@ export class PanelBox
 		});
 
 		if (!parsedChildren.find(c => c.weight === "auto"))
-			parsedChildren[parsedChildren.length - 1]!.weight = "auto";
+		{
+			const child = parsedChildren[parsedChildren.length - 1];
+			if (child)
+				child.weight = "auto";
+		}
 
 		return parsedChildren;
 	}
@@ -274,6 +329,32 @@ export class PanelBox
 	{
 		this._dir = dir;
 		this._parent = parent;
+	}
+
+	public readonly boxChild = (manager: PanelManager, targetItem: PanelItem, insertItem: PanelItem, pos: PanelInsertPosition) =>
+	{
+		const targetParent = targetItem.parent;
+
+		if (!targetParent)
+			throw new Error("");
+
+		const targetIndex = targetParent.children.indexOf(targetItem);
+
+		const item = new PanelItem(manager, {
+			dir: pos === "left" || pos === "right" ? "horizontal" : "vertical",
+			children: [],
+		});
+
+		const box = item.child as PanelBox;
+
+		if (pos === "left" || pos === "top")
+			box.appendChild(insertItem, targetItem);
+		else
+			box.appendChild(targetItem, insertItem);
+
+		insertItem.weight = targetItem.weight = "auto";
+
+		targetParent.replaceChild(makeObservable(item), targetIndex);
 	}
 
 	@action
@@ -443,7 +524,7 @@ export class PanelManager extends Store<PanelBoxProps>
 		};
 	};
 
-	private readonly panels: InitPanelManagerProps<any, any>["panels"] = {};
+	public readonly panels: InitPanelManagerProps<any, any>["panels"] = {};
 
 	@observable
 	private _rootBox: PanelBox = makeObservable(new PanelBox("horizontal"));
@@ -715,23 +796,7 @@ export class PanelManager extends Store<PanelBoxProps>
 				{
 					if (targetParent.dir !== dragDir)
 					{
-						const targetIndex = targetParent.children.indexOf(targetItem);
-
-						const item = new PanelItem(this, {
-							dir: dragDir,
-							children: [],
-						});
-
-						const box = item.child as PanelBox;
-
-						if (dragPos === "left" || dragPos === "top")
-							box.appendChild(dragItem, targetItem);
-						else
-							box.appendChild(targetItem, dragItem);
-
-						dragItem.weight = targetItem.weight = "auto";
-
-						targetParent.replaceChild(makeObservable(item), targetIndex);
+						targetParent.boxChild(this, targetItem, dragItem, dragPos);
 					}
 					else
 					{

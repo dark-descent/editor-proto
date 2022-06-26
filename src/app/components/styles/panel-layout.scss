@@ -82,11 +82,27 @@
 							border-radius: 4px;
 							font-size: 14px;
 							padding: 5px 0px;
+							white-space: nowrap;
 							.view {
 								background-color: transparent;
 								padding: 3px 15px;
 								&:hover {
 									background-color: var(--sec-background);
+									& > .sub-menu {
+										display: block;
+									}
+								}
+								.sub-menu {
+									display: none;
+									position: absolute;
+									width: 100%;
+									left: -100%;
+									top: -5px;
+									background-color: var(--tert-background);
+									border-radius: 4px;
+									font-size: 14px;
+									padding: 5px 0px;
+									white-space: nowrap;
 								}
 							}
 						}
@@ -97,6 +113,7 @@
 					}
 				}
 			}
+
 			.panel-overlay {
 				display: none;
 				pointer-events: none;
