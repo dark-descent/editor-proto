@@ -48,6 +48,7 @@ export class PanelMenuItem
 		e.preventDefault();
 		e.stopPropagation();
 		this._onClick && this._onClick(this);
+		return !!this._onClick;
 	};
 
 	@action

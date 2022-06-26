@@ -74,6 +74,7 @@
 							}
 						}
 						.menu {
+							box-shadow: var(--shadow);
 							display: none;
 							left: unset;
 							right: 0px;
@@ -96,6 +97,7 @@
 									background-color: transparent;
 								}
 								.sub-menu {
+									box-shadow: var(--shadow);
 									display: none;
 									position: absolute;
 									width: 100%;
@@ -107,6 +109,12 @@
 									padding: 5px 0px;
 									white-space: nowrap;
 								}
+							}
+							.sep {
+								margin: 0px 5px;
+								background: var(--sec-background);
+								padding: unset;
+								height: 1px;
 							}
 						}
 

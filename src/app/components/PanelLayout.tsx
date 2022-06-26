@@ -9,7 +9,7 @@ import "./styles/panel-layout.scss";
 
 const PanelMenuItemComponent = observer<{ item: PanelMenuItem | "seperator", onItemClick: (item: PanelMenuItem) => (e: React.MouseEvent) => void }>(({ item, onItemClick }) => 
 {
-	if(item === "seperator")
+	if (item === "seperator")
 		return (
 			<View className="sep" />
 		);
@@ -54,8 +54,8 @@ const PanelMenuCommponent = observer<{ menu: PanelMenu }>(({ menu }) =>
 
 	const onItemClick = (item: PanelMenuItem) => (e: React.MouseEvent) =>
 	{
-		item.onClick(e);
-		setIsOpenRef.current(!isOpen);
+		if (item.onClick(e))
+			setIsOpenRef.current(!isOpen);
 	}
 
 	return (
