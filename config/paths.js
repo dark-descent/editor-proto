@@ -11,5 +11,6 @@ module.exports = {
 	dist: resolve("dist"),
 	main: resolve(src, "main"),
 	app: resolve(src, "app"),
+	engine: resolve("engine"),
 	resolve,
 }

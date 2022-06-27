@@ -16,10 +16,8 @@
 			"ES2022"
 		],
 		"baseUrl": "./src",
-		"paths": {
-			
-		},
-		"typeRoots": [ "./node_modules/@webgpu/types", "./node_modules/@types"],
+		"paths": {},
+		"typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"],
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"module": "commonjs",
@@ -56,10 +54,12 @@
 		"allowUnusedLabels": true
 	},
 	"exclude": [
-		"./node_modules/**/*"
+		"./node_modules/**/*",
+		"./config/**/*",
+		"./public/**/*",
 	],
 	"include": [
 		"./src/**/*",
-		"./src/global.d.ts",
+		"./src/global.d.ts"
 	]
 }

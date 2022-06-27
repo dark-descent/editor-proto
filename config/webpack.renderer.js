@@ -1,4 +1,4 @@
-const { resolve, dist, app } = require("./paths");
+const { resolve, dist, app, engine } = require("./paths");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
@@ -69,6 +69,12 @@ const rendererConfig = (dev = false) =>
 					},
 				}
 			]
+		},
+		resolve: {
+			...base.resolve,
+			alias: {
+				engine: engine,
+			}
 		}
 	};
 }
