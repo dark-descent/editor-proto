@@ -6,16 +6,20 @@ import { testLayout } from "./config/PanelLayoutConfig";
 import { AppMenuStore, PanelManager } from "./stores";
 import { RootStore } from "./stores/RootStore";
 
-import { Editor } from "@engine/editor";
-
 import { Engine } from "@engine";
 
-Editor.logEngine();
-Editor.test();
+try
+{
 
-const engine = new Engine();
+	const engine = Engine.createEditorInstance();
+	const gameEngine = Engine.createGameInstance();
 
-console.log(engine);
+	console.log(engine, gameEngine);
+}
+catch (e)
+{
+	console.warn(e);
+}
 
 const rootEl = document.createElement("div");
 rootEl.id = "root";

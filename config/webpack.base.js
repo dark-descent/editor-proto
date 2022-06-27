@@ -22,7 +22,8 @@ module.exports = (dev = false) => ({
 	plugins: [
 		new webpack.DefinePlugin({
 			env: JSON.stringify({
-				isDev: dev
+				isDev: dev,
+				isEditor: true
 			})
 		})
 	]

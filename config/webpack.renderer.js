@@ -35,7 +35,7 @@ const rendererConfig = (dev = false) =>
 						from: resolve("public"),
 						to: resolve(dist, "app"),
 						globOptions: {
-							ignore: ["index.html"],
+							ignore: ["*/index.html"],
 						},
 					}
 				]
