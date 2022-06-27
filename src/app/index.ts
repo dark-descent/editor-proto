@@ -15,5 +15,5 @@ const root = ReactDOM.createRoot(rootEl);
 root.render(React.createElement(RootStore.withApp(App, (init) => 
 {
 	init(PanelManager, testLayout);
-	init(AppMenuStore, menuLayout)
+	init(AppMenuStore, menuLayout);
 })));
