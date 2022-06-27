@@ -16,7 +16,7 @@ const themeFromProps = (p: ViewTheme) =>
 
 export const View = ({ elRef, absolute, fixed, fill, centered = false, inline, className, type = "div", suppressHydrationWarning = false, primary, secundary, tertiary, ...rest }: React.PropsWithChildren<ViewProps>) =>
 {
-	const theme = themeFromProps({ primary, secundary, inherit: !primary && !secundary && !tertiary } as ViewTheme);
+	const theme = themeFromProps({ primary, secundary, tertiary } as ViewTheme);
 
 	const cn = react.getClassFromProps("view", { absolute, fixed, centered, fill, inline, className, [theme]: true });
 
