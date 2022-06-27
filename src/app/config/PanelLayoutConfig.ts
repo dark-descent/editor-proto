@@ -1,3 +1,4 @@
+import { EditPanel, ConsolePanel } from "app/panels";
 import React from "react";
 import { Panel, PanelManager } from "../stores";
 
@@ -13,11 +14,25 @@ const panels = PanelManager.createPanelMap({
 	b: TestPanelB,
 	c: TestPanelC,
 	d: TestPanelD,
+	editor: EditPanel,
+	console: ConsolePanel
 });
 
 export const testLayout = PanelManager.createConfig(panels, "horizontal", [
 	"test",
-	"a",
+	{
+		child: {
+			dir: "vertical",
+			children: [
+				{
+					child: "editor",
+					weight: window.innerHeight / 1.5,
+				},
+				"console"
+			],
+		},
+		weight: window.innerWidth / 1.4
+	},
 	[
 		"b",
 		"c",
