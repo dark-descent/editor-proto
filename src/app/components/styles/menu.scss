@@ -1,0 +1,64 @@
+.menu {
+	user-select: none;
+	& > .menu-item {
+		display: inline-block;
+		height: 100%;
+		vertical-align: top;
+		cursor: unset;
+		&:hover > .label,
+		&.active > .label {
+			background-color: rgba(0, 0, 0, 0.1);
+		}
+
+		&.active > .sub-menu {
+			left: 0px !important;
+			top: 100%;
+		}
+
+		& > .sub-menu {
+			display: none;
+			left: 100%;
+			top: 0;
+			.menu-item {
+				&:hover > .label,
+				&.active > .label {
+					background-color: rgba(0, 0, 0, 0.1);
+				}
+			}
+		}
+	}
+
+	.label {
+		font-size: 12px;
+		padding: 2px 8px;
+		height: 100%;
+		white-space: nowrap;
+	}
+
+	.sub-menu {
+		min-width: 100px;
+		display: none;
+		left: 100%;
+		padding: 5px 0px;
+		top: -5px;
+		.menu-item {
+			.label {
+				padding: 5px 18px;
+			}
+			&:hover > .label,
+			&.active > .label {
+				background-color: rgba(0, 0, 0, 0.1);
+			}
+
+			&:hover > .sub-menu {
+				display: block !important;
+			}
+		}
+	}
+
+	.menu-item.active > .sub-menu {
+		display: block;
+		z-index: 99;
+		left: 100%;
+	}
+}

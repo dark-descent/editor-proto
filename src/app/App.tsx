@@ -1,9 +1,8 @@
 import React from "react";
-import { ModalSpawner } from "./components";
-import { PanelLayout } from "./components/PanelLayout";
+import { Menu, ModalSpawner, PanelLayout } from "./components";
 import { ProjectModal } from "./modals/ProjectModal";
 import { Modal } from "./stores";
-import { View } from "./views";
+import { FlexBox, FlexItem } from "./views";
 
 export const App = () => 
 {
@@ -13,9 +12,14 @@ export const App = () =>
 	}, false);
 
 	return (
-		<View absolute fill primary>
-			<PanelLayout />
+		<FlexBox vertical absolute fill primary className="app">
+			<FlexItem base={18}>
+				<Menu />
+			</FlexItem>
+			<FlexItem>
+				<PanelLayout />
+			</FlexItem>
 			<ModalSpawner />
-		</View>
+		</FlexBox>
 	);
 };

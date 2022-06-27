@@ -5,7 +5,7 @@ import { Store } from "./Store";
 
 export class Modal
 {
-	public static readonly use = (props: ModalProps, initiallyOpen: boolean = false) => React.useMemo(() => Store.makeObservable(Store.create(Modal, props, initiallyOpen)), [props]);
+	public static readonly use = (props: ModalProps, initiallyOpen: boolean = false) => React.useMemo(() => Store.makeObservable(Store.create(Modal, props, initiallyOpen)), []);
 
 	private readonly modalManager: ModalManager;
 
