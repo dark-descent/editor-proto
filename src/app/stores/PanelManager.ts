@@ -241,7 +241,6 @@ export class PanelItem
 			{
 				props.grow = 1;
 				props.shrink = 1;
-				props.base = minSize;
 			}
 			else
 			{
@@ -292,6 +291,13 @@ export class PanelBox
 					this.parseChildren(manager, box, props.child.children, parsedChildren);
 				else
 					parsedChildren.push(makeObservable(new PanelItem(manager, props.child, props.weight)));
+			}
+			else if (Array.isArray(props.child))
+			{
+				parsedChildren.push(makeObservable(new PanelItem(manager, {
+					children: props.child,
+					dir: box.dir === "horizontal" ? "vertical" : "horizontal"
+				}, props.weight)));
 			}
 			else
 			{
@@ -573,6 +579,7 @@ export class PanelManager extends Store<PanelBoxProps>
 	public readonly getPanelProps = (key: string) => 
 	{
 		const panelProps = this.panels[key];
+
 		if (!panelProps)
 			throw new Error(`Could not get panel props for ${key}!`);
 		return panelProps;
