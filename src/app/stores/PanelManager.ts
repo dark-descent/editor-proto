@@ -136,17 +136,13 @@ export class Panel
 	@computed
 	public get title() { return this._title; }
 
-	@observable
-	private _fc: React.FC<any>;
-
-	@computed
-	public get Body() { return this._fc; }
+	public readonly Body: React.FC<any>;
 
 	public constructor(item: PanelItem, title: string, fc: React.FC<any>, menu: MenuProps | null = null)
 	{
 		this.item = item;
 		this._title = title;
-		this._fc = fc;
+		this.Body = fc;
 		this.menu = makeObservable(new PanelMenu(this, menu?.items));
 	}
 }
@@ -189,11 +185,7 @@ export class PanelItem
 			this.updateWeight(weight);
 	}
 
-	@observable
-	private _child: Panel | PanelBox;
-
-	@computed
-	public get child() { return this._child; }
+	public readonly child: Panel | PanelBox;
 
 	@observable
 	private _panelInsertPosition: PanelInsertPosition | "none" = "none";
@@ -217,11 +209,11 @@ export class PanelItem
 		{
 			const box = new PanelBox(child.dir, this);
 			box.appendChild(...PanelBox.parseChildren(manager, box, child.children));
-			this._child = makeObservable(box);
+			this.child = makeObservable(box);
 		}
 		else
 		{
-			this._child = makeObservable(new Panel(this, child.title, child.fc, child.menu));
+			this.child = makeObservable(new Panel(this, child.title, child.fc, child.menu));
 		}
 	};
 
@@ -255,7 +247,7 @@ export class PanelItem
 			{
 				props.base = this.weight + "px";
 				props.grow = 0;
-				props.shrink = 0;
+				props.shrink = 1;
 			}
 
 			return props;
@@ -263,6 +255,14 @@ export class PanelItem
 	}
 
 	public readonly onMouseLeave = () => this.setPanelInsertPosition("none");
+
+	public readonly serialize = () =>
+	{
+		return {
+			child: PanelBox.is(this.child) ? this.child.serialize() : this.manager.getPanelName(this.child.Body),
+			weight: this.weight
+		}
+	}
 }
 
 export class PanelBox
@@ -510,6 +510,8 @@ export class PanelBox
 		item.setParent(this);
 		this.updateChildren(children);
 	}
+
+	public readonly serialize = (): PanelItemProps<any>[] => this._children.map(s => s.serialize());
 }
 
 @Store.preload
@@ -549,9 +551,16 @@ export class PanelManager extends Store<PanelBoxProps>
 	protected override init({ children = [], dir = "horizontal", panels = {} }: Partial<InitPanelManagerProps<any, any>>): void 
 	{
 		Object.keys(panels).forEach(key => this.panels[key] = panels[key]!);
-
 		const box = new PanelBox(dir, null);
 		box.appendChild(...PanelBox.parseChildren(this, box, children));
+		this._rootBox = makeObservable(box);
+	}
+
+	@action
+	public readonly load = (props: { layout: PanelLayoutConfig<any>, dir: PanelBoxDir }) =>
+	{
+		const box = new PanelBox(props.dir, null);
+		box.appendChild(...PanelBox.parseChildren(this, box, props.layout));
 		this._rootBox = makeObservable(box);
 	}
 
@@ -567,6 +576,16 @@ export class PanelManager extends Store<PanelBoxProps>
 		if (!panelProps)
 			throw new Error(`Could not get panel props for ${key}!`);
 		return panelProps;
+	}
+
+	public readonly getPanelName = (fc: React.FC<any>) => Object.keys(this.panels).find(key => this.panels[key].fc === fc);
+
+	public readonly serialize = (): { layout: PanelLayoutConfig<any>, dir: PanelBoxDir } =>
+	{
+		return {
+			layout: this._rootBox.serialize() as any,
+			dir: this._rootBox.dir
+		};
 	}
 
 	public readonly useStartDragMethod = (item: PanelItem) => React.useMemo(() => () => this.setDraggingItem(item), [item]);
@@ -843,7 +862,7 @@ type PanelItemProps<K extends KeyType = string> = {
 	weight?: number | "auto";
 };
 
-type PanelBoxDir = "horizontal" | "vertical";
+export type PanelBoxDir = "horizontal" | "vertical";
 
 type PanelInsertPosition = "left" | "top" | "right" | "bottom" | "center";
 
@@ -864,6 +883,6 @@ export type InitPanelManagerProps<M extends PanelsMap, K extends KeyType> = {
 	children: PanelLayoutConfig<K>;
 };
 
-type PanelLayoutConfig<K extends KeyType> = (PanelItemProps<K> | K | ((PanelItemProps<K> | K)[]))[];
+export type PanelLayoutConfig<K extends KeyType> = (PanelItemProps<K> | K | ((PanelItemProps<K> | K)[]))[];
 
 type KeyType = string | number | symbol;
