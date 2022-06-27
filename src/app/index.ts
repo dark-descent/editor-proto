@@ -6,9 +6,16 @@ import { testLayout } from "./config/PanelLayoutConfig";
 import { AppMenuStore, PanelManager } from "./stores";
 import { RootStore } from "./stores/RootStore";
 
-import { Engine } from "@dark-descent/engine";
+import { Editor } from "@engine/editor";
 
-console.log(Engine);
+import { Engine } from "@engine";
+
+Editor.logEngine();
+Editor.test();
+
+const engine = new Engine();
+
+console.log(engine);
 
 const rootEl = document.createElement("div");
 rootEl.id = "root";

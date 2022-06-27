@@ -16,12 +16,19 @@
 			"ES2022"
 		],
 		"baseUrl": "./src",
-		"paths": {},
+		"paths": {
+			"@engine": [
+				"../engine/src/index.ts"
+			],
+			"@engine/editor": [
+				"../engine/src/editor/index.ts"
+			],
+		},
 		"typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"],
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"module": "commonjs",
-		"rootDir": "./src",
+		"rootDir": ".",
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"allowJs": true,
