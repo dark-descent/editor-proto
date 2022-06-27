@@ -17,18 +17,18 @@
 		],
 		"baseUrl": "./src",
 		"paths": {
-			"engine": [
-				"./src/engine",
+			"@engine": [
+				"../engine/src/index.ts"
 			],
-			"engine/*": [
-				"./src/engine/*",
-			]
+			"@engine/editor": [
+				"../engine/src/editor/index.ts"
+			],
 		},
-		"typeRoots": [ "./node_modules/@webgpu/types", "./node_modules/@types"],
+		"typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"],
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"module": "commonjs",
-		"rootDir": "./src",
+		"rootDir": ".",
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"allowJs": true,
@@ -61,7 +61,9 @@
 		"allowUnusedLabels": true
 	},
 	"exclude": [
-		"./node_modules/**/*"
+		"./node_modules/**/*",
+		"./config/**/*",
+		"./public/**/*",
 	],
 	"include": [
 		"./src/**/*",

@@ -1,90 +1,41 @@
+import { EditPanel, ConsolePanel } from "app/panels";
 import React from "react";
-import { PanelBoxProps } from "../stores";
+import { Panel, PanelManager } from "../stores";
 
-export const initPanelLayoutConfig: PanelBoxProps = {
-	dir: "horizontal",
-	children: [
-		{
-			child: {
-				title: "A",
-				fc: () => React.createElement("h1", {}, "AAAA"),
-				menu: {
-					items: [
-						{
-							label: "test",
-							onClick: () => { console.log("test clicked!") }
-						},
-						{
-							label: "test2",
-							onClick: () => { console.log("test2 clicked!") }
-						}
-					]
-				}
-			},
-			weight: 260
+const TestPanel = Panel.create("Test", () => React.createElement("h1", {}, "Test"));
+const TestPanelA = Panel.create("Test", () => React.createElement("h1", {}, "Test A"));
+const TestPanelB = Panel.create("Test", () => React.createElement("h1", {}, "Test B"));
+const TestPanelC = Panel.create("Test", () => React.createElement("h1", {}, "Test C"));
+const TestPanelD = Panel.create("Test", () => React.createElement("h1", {}, "Test D"));
+
+const panels = PanelManager.createPanelMap({
+	test: TestPanel,
+	a: TestPanelA,
+	b: TestPanelB,
+	c: TestPanelC,
+	d: TestPanelD,
+	editor: EditPanel,
+	console: ConsolePanel
+});
+
+export const testLayout = PanelManager.createConfig(panels, "horizontal", [
+	"test",
+	{
+		child: {
+			dir: "vertical",
+			children: [
+				{
+					child: "editor",
+					weight: window.innerHeight / 1.5,
+				},
+				"console"
+			],
 		},
-		{
-			child: {
-				title: "B",
-				fc: () => React.createElement("h1", {}, "BBBB"),
-				menu: {
-					items: [
-						{
-							label: "test",
-							onClick: () => { console.log("test clicked!") }
-						},
-						{
-							label: "test2",
-							onClick: () => { console.log("test2 clicked!") }
-						}
-					]
-				}
-			},
-		},
-		{
-			weight: 260,
-			child: {
-				dir: "vertical",
-				children: [
-					{
-						child: {
-							title: "C",
-							fc: () => React.createElement("h1", {}, "CCCC"),
-						}
-					},
-					{
-						child: {
-							title: "D",
-							fc: () => React.createElement("h1", {}, "DDDD"),
-						},
-					},
-					{
-						child: {
-							title: "E",
-							fc: () => React.createElement("h1", {}, "EEEE"),
-						},
-					},
-					{
-						child: {
-							title: "F",
-							fc: () => React.createElement("h1", {}, "FFFF"),
-						},
-					},
-					{
-						child: {
-							title: "G",
-							fc: () => React.createElement("h1", {}, "GGGG"),
-						},
-						weight: 260
-					},
-					{
-						child: {
-							title: "H",
-							fc: () => React.createElement("h1", {}, "HHHH"),
-						},
-					},
-				]
-			}
-		},
+		weight: window.innerWidth / 1.4
+	},
+	[
+		"b",
+		"c",
+		"d"
 	]
-}
+]);

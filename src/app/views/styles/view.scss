@@ -5,6 +5,9 @@
 	padding: unset;
 	margin: unset;
 
+	background-color: inherit;
+	color: inherit;
+
 	&.primary {
 		background-color: var(--main-background);
 		color: var(--main-color);
@@ -13,6 +16,11 @@
 	&.secundary {
 		background-color: var(--sec-background);
 		color: var(--sec-color);
+	}
+
+	&.tertiary {
+		background-color: var(--tert-background);
+		color: var(--tert-color);
 	}
 
 	&.inline {

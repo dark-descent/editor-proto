@@ -7,9 +7,33 @@ import { FlexBox, FlexItem, View } from "../views";
 
 import "./styles/panel-layout.scss";
 
-const PanelMenuCommponent = observer<{ menu: PanelMenu }>(({ menu }) => 
+const PanelMenuItemFC = observer<{ item: PanelMenuItem | "seperator", onItemClick: (item: PanelMenuItem) => (e: React.MouseEvent) => void }>(({ item, onItemClick }) => 
 {
-	const [isOpen, setIsOpen] = React.useState(false);
+	if (item === "seperator")
+		return (
+			<View className="sep" />
+		);
+	return (
+		<View onClick={onItemClick(item)}>
+			{item.label}
+			{item.subMenu.length > 0 && (
+				<View className="sub-menu">
+					{item.subMenu.map((item, i) => <PanelMenuItemFC key={i} item={item} onItemClick={onItemClick} />)}
+				</View>
+			)}
+		</View>
+	);
+})
+
+const PanelMenuFC = observer<{ menu: PanelMenu }>(({ menu }) => 
+{
+	const [isOpen, _setIsOpen] = React.useState(false);
+
+	const setIsOpen = (_isOpen: boolean) =>
+	{
+		menu.isOpenRef = _isOpen;
+		_setIsOpen(_isOpen);
+	}
 
 	const setIsOpenRef = React.useRef(setIsOpen);
 
@@ -30,8 +54,8 @@ const PanelMenuCommponent = observer<{ menu: PanelMenu }>(({ menu }) =>
 
 	const onItemClick = (item: PanelMenuItem) => (e: React.MouseEvent) =>
 	{
-		item.onClick(e);
-		setIsOpenRef.current(!isOpen);
+		if (item.onClick(e))
+			setIsOpenRef.current(!isOpen);
 	}
 
 	return (
@@ -40,17 +64,10 @@ const PanelMenuCommponent = observer<{ menu: PanelMenu }>(({ menu }) =>
 				<View absolute centered />
 			</View>
 			<View className="menu" absolute>
-				{menu.items.map((item, i) => 
-				{
-					return (
-						<View key={i} onClick={onItemClick(item)}>
-							{item.label}
-						</View>
-					);
-				})}
+				{menu.items.map((item, i) => <PanelMenuItemFC key={i} item={item} onItemClick={onItemClick} />)}
 			</View>
 		</View>
-	)
+	);
 });
 
 const PanelWrapper = withStore<PanelManager, { panel: Panel, item: PanelItem }>(PanelManager, ({ panel, item, store }) =>
@@ -63,9 +80,9 @@ const PanelWrapper = withStore<PanelManager, { panel: Panel, item: PanelItem }>(
 		<View className="panel-wrapper" absolute fill onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={item.onMouseLeave}>
 			<FlexBox className="panel" absolute fill vertical>
 				<FlexItem base={24}>
-					<View className="panel-title" fill absolute onMouseDown={onStartDrag}>
-						{panel.title}
-						{panel.menu && <PanelMenuCommponent menu={panel.menu} />}
+					<View className="panel-titlebar" fill absolute onMouseDown={onStartDrag}>
+						<View className="title">{panel.title}</View>
+						{panel.menu && <PanelMenuFC menu={panel.menu} />}
 					</View>
 				</FlexItem>
 				<FlexItem>
@@ -88,7 +105,7 @@ const Item = withStore<PanelManager, { item: PanelItem, isLast: boolean }>(Panel
 	return (
 		<FlexItem {...props} elRef={item.ref}>
 			{PanelBox.is(item.child) ? <Box box={item.child} /> : <PanelWrapper panel={item.child} item={item} />}
-			{!isLast && <View absolute className={getClassFromProps("slider", {})} onMouseDown={onStartSlide} />}
+			{!isLast && <View absolute className={getClassFromProps("slider", {})} onMouseDown={onStartSlide}><View /></View>}
 		</FlexItem>
 	);
 });

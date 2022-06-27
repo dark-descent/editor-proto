@@ -41,7 +41,7 @@ export const Modal = observer(({ modal, isLast }: { modal: ModalStore, isLast: b
 
 	return (
 		<View centered fixed className="modal" onClick={preventEvent} style={style}>
-			<FlexBox fill vertical>
+			<FlexBox fill vertical primary>
 				<FlexItem base={64}>
 					<View absolute fill className="title-bar">
 						<View type="h1" className="title">{title}</View>

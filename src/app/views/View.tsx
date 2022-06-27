@@ -5,14 +5,18 @@ import "./styles/view.scss";
 
 const themeFromProps = (p: ViewTheme) =>
 {
-	if ("secundary" in p && p.secundary === true)
+	if (p.tertiary)
+		return "tertiary";
+	else if (p.secundary)
 		return "secundary";
-	return "primary";
+	else if (p.primary)
+		return "primary";
+	return "inherit";
 }
 
-export const View = ({ elRef, absolute, fixed, fill, centered = false, inline, className, type = "div", suppressHydrationWarning = false, primary, secundary, ...rest }: React.PropsWithChildren<ViewProps>) =>
+export const View = ({ elRef, absolute, fixed, fill, centered = false, inline, className, type = "div", suppressHydrationWarning = false, primary, secundary, tertiary, ...rest }: React.PropsWithChildren<ViewProps>) =>
 {
-	const theme = themeFromProps({ primary, secundary } as ViewTheme);
+	const theme = themeFromProps({ primary, secundary, tertiary } as ViewTheme);
 
 	const cn = react.getClassFromProps("view", { absolute, fixed, centered, fill, inline, className, [theme]: true });
 
@@ -37,4 +41,5 @@ export type ViewProps = IViewProps & ViewTheme;
 export type ViewTheme = {
 	primary?: boolean;
 	secundary?: boolean;
+	tertiary?: boolean;
 };
