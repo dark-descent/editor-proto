@@ -17,12 +17,7 @@
 		],
 		"baseUrl": "./src",
 		"paths": {
-			"engine": [
-				"./src/engine",
-			],
-			"engine/*": [
-				"./src/engine/*",
-			]
+			
 		},
 		"typeRoots": [ "./node_modules/@webgpu/types", "./node_modules/@types"],
 		"experimentalDecorators": true,
@@ -65,6 +60,6 @@
 	],
 	"include": [
 		"./src/**/*",
-		"./src/global.d.ts"
+		"./src/global.d.ts",
 	]
 }
