@@ -18,7 +18,7 @@ export class EditorStore extends Store
 	public readonly loadProject = async (projectProps: ProjectProps) =>
 	{
 		const project = await this.editor.loadProject(projectProps);
-		await this.getStore(SceneStore).loadScene("test");
+		await this.getStore(SceneStore).loadScene("Test Scene");
 		this._project = project;
 	}
 }

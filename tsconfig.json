@@ -58,7 +58,8 @@
 		"noImplicitReturns": true,
 		"noUncheckedIndexedAccess": true,
 		"noImplicitOverride": true,
-		"allowUnusedLabels": true
+		"allowUnusedLabels": true,
+		"noStrictGenericChecks": true
 	},
 	"exclude": [
 		"./node_modules/**/*",
