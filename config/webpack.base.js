@@ -26,5 +26,8 @@ module.exports = (dev = false) => ({
 				isEditor: true
 			})
 		})
-	]
+	],
+	experiments: {
+		topLevelAwait: true
+	}
 });

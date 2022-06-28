@@ -22,7 +22,7 @@ export class RootStore
 
 	private constructor() { }
 
-	public get<T extends Store<P>, P extends {}>(storeType: StoreType<T>): T
+	public readonly get = <T extends Store<P>, P extends {}>(storeType: StoreType<T>): T =>
 	{
 		let store = this.stores.get(storeType);
 		if (!store)
@@ -40,11 +40,11 @@ export class RootStore
 		return store;
 	}
 
-	public static readonly withApp = (app: React.FC<{}>, initStores: (init: StoreInitializer) => any = () => { }) =>
+	public static readonly withApp = async (app: React.FC<{}>, initStores: (rootStore: RootStore, init: StoreInitializer) => any = () => { }) =>
 	{
 		const ctx = require.context("./", false, /.(tsx?|jsx?|json)$/, "sync");
 
-		initStores((type, props) => this.instance._initProps.set(type, props));
+		await initStores(this.instance, (type, props) => this.instance._initProps.set(type, props));
 
 		// load all the stores that wants to be preloaded
 		ctx.keys().forEach(ctx);

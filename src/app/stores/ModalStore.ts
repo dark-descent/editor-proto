@@ -23,22 +23,29 @@ export class Modal
 	@computed
 	public get Component() { return this._Component; }
 
+	private readonly canClose: () => boolean;
+
 	public constructor(props: ModalProps, initiallyOpen: boolean = false)
 	{
-		const { title, Component, ...options } = props;
+		const { title, Component, canClose, ...options } = props;
 
 		this._title = title;
 		this._Component = Component;
 		this.modalManager = RootStore.instance.get(ModalManager);
 		this.options = options;
+		this.canClose = canClose || (() => true);
 
-		if(initiallyOpen)
+		if (initiallyOpen)
 			this.modalManager.open(this);
 	}
 
 	public readonly open = () => this.modalManager.open(this);
 
-	public readonly close = () => this.modalManager.close(this);
+	public readonly close = () => 
+	{
+		if (this.canClose())
+			this.modalManager.close(this);
+	};
 
 	public readonly toggle = () =>
 	{
@@ -59,6 +66,7 @@ export class Modal
 type ModalProps = {
 	Component: React.FC<any>;
 	title: string;
+	canClose?: () => boolean;
 } & ModalOptions;
 
 export type ModalOptions = {

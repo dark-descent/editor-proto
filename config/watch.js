@@ -7,7 +7,7 @@ let proc;
 
 const watchEditor = (cb = () => { }) => 
 {
-	webpack(mainConfig(true)).watch({ ignored: ["editor/app/*"] }, (err, stats) => 
+	webpack(mainConfig(true)).watch({ ignored: ["src/editor/app/*", "engine/*"] }, (err, stats) => 
 	{
 		if (err)
 		{
