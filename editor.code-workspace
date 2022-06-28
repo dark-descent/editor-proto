@@ -3,17 +3,20 @@
 		{
 			"name": "project",
 			"path": "."
-		},
-		{
-			"name": "engine",
-			"path": "./engine/src"
-		},
-		{
-			"name": "editor",
-			"path": "./src"
 		}
 	],
 	"settings": {
-		
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/Thumbs.db": true,
+			"**/dist/**": true,
+			"**/node_modules/**": true,
+			"**/package-lock.json": true,
+			"**/config/**": true
+		}
 	}
 }
