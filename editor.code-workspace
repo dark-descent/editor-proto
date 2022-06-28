@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"name": "project",
+			"path": "."
+		},
+		{
+			"name": "engine",
+			"path": "./engine/src"
+		},
+		{
+			"name": "editor",
+			"path": "./src"
+		}
+	],
+	"settings": {
+		
+	}
+}
