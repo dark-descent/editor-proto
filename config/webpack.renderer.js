@@ -4,6 +4,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
 const baseConfig = require("./webpack.base");
+const { platform } = require("os");
 
 const rendererConfig = (dev = false) =>
 {
@@ -37,6 +38,10 @@ const rendererConfig = (dev = false) =>
 						globOptions: {
 							ignore: ["*/index.html"],
 						},
+					},
+					{
+						from: platform() === "win32" ? resolve("engine", "build", dev ? "Debug" : "Release", "addon.node") : resolve("engine", "build", dev ? "Debug" : "Release", "addon.node"),
+						to: resolve(dist, "app", "addon.node"),
 					}
 				]
 			}),
