@@ -1,4 +1,3 @@
-import path from "path";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
@@ -6,6 +5,8 @@ import { menuLayout } from "./config/MenuLayout";
 import { testLayout } from "./config/PanelLayoutConfig";
 import { AppMenuStore, PanelManager } from "./stores";
 import { RootStore } from "./stores/RootStore";
+
+import { Engine } from "@engine";
 
 const rootEl = document.createElement("div");
 rootEl.id = "root";
@@ -20,3 +21,6 @@ const InitializedApp = await RootStore.withApp(App, async (root, init) =>
 });
 
 root.render(React.createElement(InitializedApp));
+
+const engine = new Engine();
+console.log(engine);
