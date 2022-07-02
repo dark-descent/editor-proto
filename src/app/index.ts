@@ -22,5 +22,8 @@ const InitializedApp = await RootStore.withApp(App, async (root, init) =>
 
 root.render(React.createElement(InitializedApp));
 
-const engine = new Engine();
+const engine = Engine.initialize({
+	test: 123
+});
+
 console.log(engine);

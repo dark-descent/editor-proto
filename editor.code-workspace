@@ -3,7 +3,12 @@
 		{
 			"name": "project",
 			"path": "."
-		}
+		},
+		{
+			"name": "engine-addon",
+			"path": "./engine/src/addon"
+		},
+		
 	],
 	"settings": {
 		"files.exclude": {
@@ -16,7 +21,8 @@
 			"**/dist/**": true,
 			"**/node_modules/**": true,
 			"**/package-lock.json": true,
-			// "**/config/**": true
+			"**/config/**": true,
+			"**/.vscode/**": true
 		}
 	}
 }
