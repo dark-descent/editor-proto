@@ -17,7 +17,6 @@ const rendererConfig = (dev = false) =>
 		output: {
 			filename: `js/[name].js`,
 			chunkFilename: 'js/[id].js',
-			clean: true,
 			path: resolve(dist, "app"),
 		},
 		plugins: [
@@ -38,10 +37,6 @@ const rendererConfig = (dev = false) =>
 						globOptions: {
 							ignore: ["**/index.html"],
 						},
-					},
-					{
-						from: platform() === "win32" ? resolve("engine", "build", dev ? "Debug" : "Release", "addon.node") : resolve("engine", "build", dev ? "Debug" : "Release", "addon.node"),
-						to: resolve(dist, "app", "addon.node"),
 					}
 				]
 			}),

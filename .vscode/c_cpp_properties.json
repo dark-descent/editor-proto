@@ -3,7 +3,7 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
+                "${workspaceFolder}/engine/src/addon/include/**",
 				"~/AppData/Local/node-gyp/Cache/19.0.4/include/node/**"
             ],
             "defines": [
