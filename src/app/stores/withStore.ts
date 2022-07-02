@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { Store, StoreType } from "./Store";
 import { RootStore } from "./RootStore";
 
-export const withStore = <T extends Store, Props extends {}>(storeType: StoreType<T>, Component: React.FC<Props & { store: T }>, weak: boolean = false): React.FC<Props> =>
+export const withStore = <T extends Store, Props extends {} = {}>(storeType: StoreType<T>, Component: React.FC<Props & { store: T }>, weak: boolean = false): React.FC<Props> =>
 {
 	Component = observer(Component);
 
@@ -28,7 +28,7 @@ export const withStore = <T extends Store, Props extends {}>(storeType: StoreTyp
 	}
 }
 
-export const withStores = <T extends { [key: string]: Store }, Props extends {}>(storeTypes: { [K in keyof T]: StoreType<T[K]> }, Component: React.FC<Props & T>, weak: boolean = false): React.FC<Props> =>
+export const withStores = <T extends { [key: string]: Store }, Props extends {} = {}>(storeTypes: { [K in keyof T]: StoreType<T[K]> }, Component: React.FC<Props & T>, weak: boolean = false): React.FC<Props> =>
 {
 	Component = observer(Component);
 

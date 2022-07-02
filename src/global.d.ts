@@ -1,5 +1,6 @@
 declare const env: {
 	isDev: boolean;
+	isEditor: boolean;
 };
 
 declare type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T];

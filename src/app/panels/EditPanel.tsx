@@ -1,12 +1,23 @@
-import { Panel } from "app/stores";
-import { View } from "app/views";
+import { Panel, withStores } from "app/stores";
+import { FlexBox, FlexItem } from "app/views";
 import React from "react";
 
-export const EditPanel = Panel.create("Edit View", () => 
+import "./styles/edit-panel.scss";
+
+const EditPanelComponent = withStores({  }, ({  }) => 
 {
+	const ref = React.useRef<HTMLCanvasElement>();
+
 	return (
-		<View>
-			
-		</View>
+		<FlexBox className="edit-panel" absolute fill vertical>
+			<FlexItem base={20}>
+				
+			</FlexItem>
+			<FlexItem>
+				<canvas ref={ref as any} />
+			</FlexItem>
+		</FlexBox>
 	);
 });
+
+export const EditPanel = Panel.create("Edit View", EditPanelComponent);

@@ -1,7 +1,7 @@
 import React from "react";
 import { useModal } from "../components"
 
-export const ProjectModal = () =>
+export const OpenModal = () =>
 {
 	const modal = useModal();
 

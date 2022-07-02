@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"jsx": "react",
 		"incremental": true,
-		"target": "ES6",
+		"target": "ES2017",
 		"lib": [
 			"DOM",
 			"DOM.Iterable",
@@ -27,7 +27,7 @@
 		"typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"],
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
-		"module": "commonjs",
+		"module": "esnext",
 		"rootDir": ".",
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
@@ -58,7 +58,8 @@
 		"noImplicitReturns": true,
 		"noUncheckedIndexedAccess": true,
 		"noImplicitOverride": true,
-		"allowUnusedLabels": true
+		"allowUnusedLabels": true,
+		"noStrictGenericChecks": true
 	},
 	"exclude": [
 		"./node_modules/**/*",

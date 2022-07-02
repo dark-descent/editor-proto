@@ -1,13 +1,16 @@
 .view.fixed.modal-spawner {
-	background-color: rgba(65, 65, 65, 0.35);
+	background-color: rgba(65, 65, 65, 0);
 	width: 0px;
 	height: 0px;
 	backdrop-filter: blur(0px);
+	transition: background-color 650ms, width 0ms 650ms, height 0ms 650ms;
 	z-index: 9999;
 	&.open {
+		background-color: rgba(65, 65, 65, 0.35);
 		width: 100vw;
 		height: 100vh;
-		backdrop-filter: blur(0.8px);
+		backdrop-filter: blur(100px);
+		transition: background-color 650ms, width 0ms 0ms, height 0ms 0ms;
 	}
 	.modal {
 		overflow: hidden;
