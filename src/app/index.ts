@@ -23,7 +23,22 @@ const InitializedApp = await RootStore.withApp(App, async (root, init) =>
 root.render(React.createElement(InitializedApp));
 
 const engine = Engine.initialize({
-	test: 123
+	logHandler: (level, msg) => 
+	{
+		switch (level)
+		{
+			case "exception":
+			case "error":
+				console.error(msg);
+				break;
+			case "info":
+				console.info(msg);
+				break;
+			case "warn":
+				console.warn(msg);
+				break;
+		}
+	}
 });
 
 console.log(engine);
