@@ -42,3 +42,11 @@ const engine = Engine.initialize({
 });
 
 console.log(engine);
+
+engine.systems.Renderer.on("test", (data) => 
+{
+	console.log(data.test ? ":D" : ":(");
+});
+
+engine.systems.Renderer.testEvent("test", { test: true });
+engine.systems.Renderer.testEvent("test", { test: false });

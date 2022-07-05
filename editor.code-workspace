@@ -23,6 +23,11 @@
 			"**/package-lock.json": true,
 			"**/config/**": true,
 			"**/.vscode/**": true
+		},
+		"files.associations": {
+			"bochsrc": "plaintext",
+			"*.ld": "linkerscript",
+			"vector": "cpp"
 		}
 	}
 }
