@@ -53,6 +53,7 @@ const watchEditor = (cb = () => { }) =>
 
 				copyTimeout = setTimeout(async () => 
 				{
+					console.log(addonBuildPath);
 					if (existsSync(addonBuildPath))
 					{
 						try

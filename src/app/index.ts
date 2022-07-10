@@ -23,6 +23,7 @@ const InitializedApp = await RootStore.withApp(App, async (root, init) =>
 root.render(React.createElement(InitializedApp));
 
 const engine = Engine.initialize({
+	gameName: "Test",
 	logHandler: (level, msg) => 
 	{
 		switch (level)
@@ -43,10 +44,10 @@ const engine = Engine.initialize({
 
 console.log(engine);
 
-engine.systems.Renderer.on("test", (data) => 
-{
-	console.log(data.test ? ":D" : ":(");
-});
+// engine.systems.Renderer.on("test", (data) => 
+// {
+// 	console.log(data.test ? ":D" : ":(");
+// });
 
-engine.systems.Renderer.testEvent("test", { test: true });
-engine.systems.Renderer.testEvent("test", { test: false });
+// engine.systems.Renderer.testEvent("test", { test: true });
+// engine.systems.Renderer.testEvent("test", { test: false });

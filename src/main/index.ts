@@ -42,8 +42,9 @@ app.whenReady().then(() =>
 
 	browserWindow.on("ready-to-show", () => 
 	{
-		browserWindow.maximize();
-		browserWindow.show();
-		browserWindow.webContents.openDevTools();
+		console.log("READY :D");
+		// browserWindow.maximize();
+		// browserWindow.show();
+		// browserWindow.webContents.openDevTools();
 	});
 });

@@ -5,7 +5,8 @@
 	"scripts": {
 		"start": "cross-env NODE_ENV=development electron dist/editor/main.js",
 		"watch": "cross-env NODE_ENV=development node config/watch",
-		"build": "cross-env NODE_ENV=development node config/build",
+		"build": "cross-env NODE_ENV=production node config/build",
+		"build-dev": "cross-env NODE_ENV=development node config/build",
 		"prepare": "git submodule init && git submodule update && cd engine && git checkout dev && npm i "
 	},
 	"repository": {
