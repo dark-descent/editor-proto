@@ -43,8 +43,14 @@ app.whenReady().then(() =>
 	browserWindow.on("ready-to-show", () => 
 	{
 		console.log("READY :D");
-		// browserWindow.maximize();
-		// browserWindow.show();
-		// browserWindow.webContents.openDevTools();
+		browserWindow.maximize();
+		browserWindow.show();
+		browserWindow.webContents.openDevTools();
 	});
+});
+
+app.on("window-all-closed", () => 
+{
+	console.log("QUIT :D");
+	app.quit();
 });

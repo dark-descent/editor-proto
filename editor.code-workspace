@@ -27,6 +27,7 @@
 		"files.associations": {
 			"bochsrc": "plaintext",
 			"*.ld": "linkerscript",
+			"*.tpp": "cpp",
 			"vector": "cpp",
 			"algorithm": "cpp",
 			"array": "cpp",
@@ -48,8 +49,10 @@
 			"cwchar": "cpp",
 			"deque": "cpp",
 			"exception": "cpp",
+			"filesystem": "cpp",
 			"format": "cpp",
 			"forward_list": "cpp",
+			"fstream": "cpp",
 			"functional": "cpp",
 			"initializer_list": "cpp",
 			"iomanip": "cpp",
@@ -94,8 +97,11 @@
 			"xtr1common": "cpp",
 			"xtree": "cpp",
 			"xutility": "cpp",
-			"filesystem": "cpp",
-			"fstream": "cpp"
+			"condition_variable": "cpp",
+			"mutex": "cpp",
+			"stop_token": "cpp",
+			"thread": "cpp",
+			"queue": "cpp"
 		}
 	}
 }
