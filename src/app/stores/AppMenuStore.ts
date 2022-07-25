@@ -58,7 +58,7 @@ export class MenuItem
 	private readonly updateActive = (isActive: boolean) => 
 	{
 		this._isActive = isActive;
-		if(!this._isActive)
+		if (!this._isActive)
 			this._subMenu.forEach(item => item !== MenuSeperator && item.setActive(false));
 	};
 
@@ -66,10 +66,10 @@ export class MenuItem
 
 	public readonly setActive = (isActive: boolean) =>
 	{
-		if(this._isActive !== isActive)
+		if (this._isActive !== isActive)
 		{
 			this.updateActive(isActive);
-			if(isActive && this.parent)
+			if (isActive && this.parent)
 				this.parent._subMenu.forEach(m => m !== this && m !== MenuSeperator && m.setActive(false));
 		}
 	};
@@ -92,7 +92,7 @@ export class MenuItem
 			this.menu.setActiveItem(this._isActive ? this : null);
 			return true;
 		}
-		else if(this.hasSubMenu)
+		else if (this.hasSubMenu)
 		{
 			this.toggle();
 		}
@@ -103,7 +103,7 @@ export class MenuItem
 	public readonly onMouseEnter = (e: MouseEvent) =>
 	{
 		const activeItem = this.parent?.subMenuItems.find(m => m !== MenuSeperator && m._isActive) as MenuItem | undefined;
-		if(activeItem)
+		if (activeItem)
 			activeItem.setActive(false);
 	}
 
@@ -111,6 +111,9 @@ export class MenuItem
 	{
 
 	}
+
+	@action
+	public readonly setSubMenuItems = (items: MenuItemProps[]) => { this._subMenu = MenuItem.parseItems(items, this.menu, this); };
 }
 
 @Store.preload
@@ -143,7 +146,7 @@ export class AppMenuStore extends Store<MenuItemProps[]>
 
 	public readonly setActiveItem = (item: MenuItem | null) => 
 	{
-		if(this._activeItem)
+		if (this._activeItem)
 			this._activeItem.setActive(false);
 		this._activeItem = item;
 	};

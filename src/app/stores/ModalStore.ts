@@ -5,7 +5,7 @@ import { Store } from "./Store";
 
 export class Modal
 {
-	public static readonly use = (props: ModalProps, initiallyOpen: boolean = false) => React.useMemo(() => Store.makeObservable(new Modal(props, initiallyOpen)), []);
+	public static readonly create = (props: ModalProps, initiallyOpen: boolean = false) => Store.makeObservable(new Modal(props, initiallyOpen));
 
 	private readonly modalManager: ModalManager;
 
@@ -26,7 +26,7 @@ export class Modal
 	@computed
 	public get Component() { return this._Component; }
 
-	private readonly canClose: () => boolean;
+	public readonly canClose: () => boolean;
 
 	public constructor(props: ModalProps, initiallyOpen: boolean = false)
 	{
@@ -47,7 +47,7 @@ export class Modal
 	public readonly open = () => 
 	{
 		this.modalManager.open(this);
-		return new Promise((resolve, reject) =>
+		return new Promise<any>((resolve, reject) =>
 		{
 			if (this.openPromiseResolver !== null && this.openPromiseRejecter)
 				this.openPromiseRejecter("Previous modal was already open!");

@@ -41,6 +41,7 @@ app.whenReady().then(() =>
 		},
 		title: "Dark Descent - Editor"
 	});
+	
 
 	browserWindow.setMenu(null);
 

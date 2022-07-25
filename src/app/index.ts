@@ -7,6 +7,7 @@ import { AppMenuStore, PanelManager } from "./stores";
 import { RootStore } from "./stores/RootStore";
 
 import { Engine } from "@engine";
+import { AppStore } from "./stores/AppStore";
 
 const rootEl = document.createElement("div");
 rootEl.id = "root";
@@ -16,38 +17,29 @@ const root = ReactDOM.createRoot(rootEl);
 
 const InitializedApp = await RootStore.withApp(App, async (root, init) => 
 {
+	const engine = await Engine.initialize({
+		gameName: "Dark Descent",
+		logHandler: (level, msg) => 
+		{
+			switch (level)
+			{
+				case "exception":
+				case "error":
+					console.error(msg);
+					break;
+				case "info":
+					console.info(msg);
+					break;
+				case "warn":
+					console.warn(msg);
+					break;
+			}
+		}
+	});
+
 	init(PanelManager, testLayout);
 	init(AppMenuStore, createMenuLayout(root));
+	init(AppStore, { engine });
 });
 
 root.render(React.createElement(InitializedApp));
-
-const engine = await Engine.initialize({
-	gameName: "Test",
-	logHandler: (level, msg) => 
-	{
-		switch (level)
-		{
-			case "exception":
-			case "error":
-				console.error(msg);
-				break;
-			case "info":
-				console.info(msg);
-				break;
-			case "warn":
-				console.warn(msg);
-				break;
-		}
-	}
-});
-
-console.log(engine);
-
-// engine.systems.Renderer.on("test", (data) => 
-// {
-// 	console.log(data.test ? ":D" : ":(");
-// });
-
-// engine.systems.Renderer.testEvent("test", { test: true });
-// engine.systems.Renderer.testEvent("test", { test: false });
