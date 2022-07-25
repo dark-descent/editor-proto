@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"jsx": "react",
 		"incremental": true,
-		"target": "ES2017",
+		"target": "esnext",
 		"lib": [
 			"DOM",
 			"DOM.Iterable",

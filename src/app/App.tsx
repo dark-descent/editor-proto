@@ -2,14 +2,18 @@ import React from "react";
 import { Menu, ModalSpawner, PanelLayout } from "./components";
 import { OpenModal } from "./modals/OpenModal";
 import { Modal } from "./stores";
+import { RootStore } from "./stores/RootStore";
+import { SceneManager } from "./stores/SceneManager";
+import { Store } from "./stores/Store";
 import { FlexBox, FlexItem } from "./views";
 
 export const App = () => 
 {
 	const openModal = Modal.use({
 		Component: OpenModal,
-		title: "Project",
-		canClose: () => false
+		title: "Scenes",
+		canClose: () => RootStore.get(SceneManager).loadedScenes.length > 0,
+		closable: false
 	}, true);
 
 	return (

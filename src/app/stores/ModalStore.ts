@@ -5,7 +5,7 @@ import { Store } from "./Store";
 
 export class Modal
 {
-	public static readonly use = (props: ModalProps, initiallyOpen: boolean = false) => React.useMemo(() => Store.makeObservable(Store.create(Modal, props, initiallyOpen)), []);
+	public static readonly use = (props: ModalProps, initiallyOpen: boolean = false) => React.useMemo(() => Store.makeObservable(new Modal(props, initiallyOpen)), []);
 
 	private readonly modalManager: ModalManager;
 
@@ -13,6 +13,9 @@ export class Modal
 	private _title: string = "";
 
 	public readonly options: Readonly<ModalOptions>;
+
+	private openPromiseResolver: ((value: unknown) => void) | null = null;
+	private openPromiseRejecter: ((reason?: any) => void) | null = null;
 
 	@computed
 	public get title() { return this._title; }
@@ -32,6 +35,8 @@ export class Modal
 		this._title = title;
 		this._Component = Component;
 		this.modalManager = RootStore.instance.get(ModalManager);
+		if (options.closable === undefined)
+			options.closable = true;
 		this.options = options;
 		this.canClose = canClose || (() => true);
 
@@ -39,12 +44,28 @@ export class Modal
 			this.modalManager.open(this);
 	}
 
-	public readonly open = () => this.modalManager.open(this);
+	public readonly open = () => 
+	{
+		this.modalManager.open(this);
+		return new Promise((resolve, reject) =>
+		{
+			if (this.openPromiseResolver !== null && this.openPromiseRejecter)
+				this.openPromiseRejecter("Previous modal was already open!");
+			this.openPromiseResolver = resolve;
+			this.openPromiseRejecter = reject;
+		});
+	};
 
-	public readonly close = () => 
+	public readonly close = (val?: any) => 
 	{
 		if (this.canClose())
+		{
 			this.modalManager.close(this);
+			if (this.openPromiseResolver)
+				this.openPromiseResolver(val);
+			this.openPromiseResolver = null;
+			this.openPromiseRejecter = null;
+		}
 	};
 
 	public readonly toggle = () =>

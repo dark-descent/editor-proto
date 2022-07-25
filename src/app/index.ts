@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
-import { menuLayout } from "./config/MenuLayout";
+import { createMenuLayout } from "./config/MenuLayout";
 import { testLayout } from "./config/PanelLayoutConfig";
 import { AppMenuStore, PanelManager } from "./stores";
 import { RootStore } from "./stores/RootStore";
@@ -17,12 +17,12 @@ const root = ReactDOM.createRoot(rootEl);
 const InitializedApp = await RootStore.withApp(App, async (root, init) => 
 {
 	init(PanelManager, testLayout);
-	init(AppMenuStore, menuLayout);
+	init(AppMenuStore, createMenuLayout(root));
 });
 
 root.render(React.createElement(InitializedApp));
 
-const engine = Engine.initialize({
+const engine = await Engine.initialize({
 	gameName: "Test",
 	logHandler: (level, msg) => 
 	{

@@ -27,7 +27,7 @@ export class RootStore
 		let store = this.stores.get(storeType);
 		if (!store)
 		{
-			store = Store.create<T, StoreType<T>>(storeType, this);
+			store = Store.create<T>(storeType, this);
 			if (this.isInitialized)
 			{
 				store["init"](this.getInitStoreProp(storeType));

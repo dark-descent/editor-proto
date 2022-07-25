@@ -2,3 +2,5 @@ node_modules
 dist
 public/addon.node
 test-project/logs
+build
+logs

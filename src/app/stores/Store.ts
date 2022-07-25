@@ -3,24 +3,24 @@ import { RootStore } from "./RootStore";
 
 export class Store<P extends {} = {}>
 {
-	public static readonly create = <T extends InstanceType<new (...args: any) => any> = InstanceType<new (...args: any) => any>, Type extends new (...args: any[]) => T = new (...args: any[]) => T>(storeType: Type, ...params: ConstructorParameters<Type>): T => 
+	public static readonly create = <T extends Store<any>>(storeType: StoreType<T>, ...params: ConstructorParameters<StoreType<T>>): T => 
 	{
 		const store = new storeType(...params) as any;
 		return store;
 	}
 
-	public static readonly makeObservable = <T extends Store>(store: T): T =>
+	public static readonly makeObservable = <T>(store: T): T =>
 	{
 		try
 		{
-			return makeObservable(store);
+			return makeObservable(store as any);
 		}
 		catch (e)
 		{
 			const error = e as Error;
 			const err = "[MobX] No annotations were passed to makeObservable, but no decorated members have been found either";
 			if (error.message === err)
-				error.message += `!\r\nTried to decorate "${store.constructor.name}"!`;
+				error.message += `!\r\nTried to decorate "${(store as any).constructor.name}"!`;
 			console.warn(error);
 			return store;
 		}

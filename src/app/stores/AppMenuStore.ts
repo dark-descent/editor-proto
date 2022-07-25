@@ -41,9 +41,6 @@ export class MenuItem
 
 	public get isRootItem() { return this.parent === null; }
 
-	// private subMenuHideTimeout: NodeJS.Timeout | null = null;
-	// private hideCallback: 
-
 	public constructor(props: ItemProps, parent: MenuItem | null = null, menu: AppMenuStore)
 	{
 		this.menu = menu;

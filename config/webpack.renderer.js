@@ -75,6 +75,18 @@ const rendererConfig = (dev = false) =>
 			alias: {
 				engine: engine,
 			}
+		},
+		optimization: {
+			minimize: false,
+			splitChunks: {
+				cacheGroups: {
+					vendor: {
+						test: /[\\/]node_modules[\\/]/,
+						name: "vendors",
+						chunks: "all"
+					}
+				}
+			}
 		}
 	};
 }

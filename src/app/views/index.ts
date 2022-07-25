@@ -5,3 +5,4 @@ export * from "./ListView";
 export * from "./View";
 export * from "./Image";
 export * from "./Icon";
+export * from "./Button";

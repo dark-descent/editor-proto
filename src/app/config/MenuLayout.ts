@@ -1,48 +1,32 @@
 import { MenuItemClickHandler, MenuItemProps } from "app/stores";
+import { RootStore } from "app/stores/RootStore";
+import { SceneManager } from "app/stores/SceneManager";
 
-const onSceneOpen: MenuItemClickHandler = (e, item) =>
+
+
+export const createMenuLayout = (rootStore: RootStore): MenuItemProps[] => 
 {
-	console.log(`Open scene ${item.label}`);
-};
+	const sceneManager = rootStore.get(SceneManager);
 
-export const menuLayout: MenuItemProps[] = [
-	{
-		label: "File",
-		subMenu: [
-			{
-				label: "Save Scene",
-				onClick: () => { console.log("saving scene..."); }
-			},
-			{
-				label: "Open Scene",
-				subMenu: [
-					{
-						label: "Test Scene",
-						onClick: onSceneOpen,
-					},
-					{
-						label: "Test Scene 2",
-						onClick: onSceneOpen,
-					},
-					{
-						label: "Test Scene 3",
-						onClick: onSceneOpen,
-					}
-				]
-			},
-			// {
-			// 	label: "Load Scene"
-			// },
-			// MenuSeperator,
-			// {
-			// 	label: "Load Scene"
-			// }
-		]
-	},
-	{
-		label: "Edit",
-	},
-	{
-		label: "Windows",
-	}
-];
+	return [
+		{
+			label: "File",
+			subMenu: [
+				{
+					label: "Save Scene",
+					onClick: () => { console.log("saving scene..."); }
+				},
+				{
+					label: "Open Scene",
+					subMenu: sceneManager.data.scenes.map((s) => ({ label: s.name, onClick: () => sceneManager.loadScene(s.name) }))
+				}
+			]
+		},
+		{
+			label: "Edit",
+		},
+		{
+			label: "Windows",
+		}
+	];
+};

@@ -36,7 +36,7 @@ export const useModal = (): ModalStore =>
 export const Modal = observer(({ modal, isLast }: { modal: ModalStore, isLast: boolean }) =>
 {
 	const { Component, title, options } = modal;
-
+	
 	const style = React.useMemo(() => parseStyleOptions(options), []);
 
 	return (
@@ -45,9 +45,9 @@ export const Modal = observer(({ modal, isLast }: { modal: ModalStore, isLast: b
 				<FlexItem base={64}>
 					<View absolute fill className="title-bar">
 						<View type="h1" className="title">{title}</View>
-						<View absolute className="close-btn" onClick={modal.close}>
+						{options.closable && <View absolute className="close-btn" onClick={modal.close}>
 							<View fill className="inner-btn" />
-						</View>
+						</View>}
 					</View>
 				</FlexItem>
 				<FlexItem>

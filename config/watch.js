@@ -14,8 +14,9 @@ const watchEditor = (cb = () => { }) =>
 {
 	let editorProc;
 
-	const startEditor = () =>
+	const startEditor = async () =>
 	{
+		await killEditor();
 		editorProc = run("./dist/main.js", editorProc);
 		editorProc.on("exit", () => { editorProc = null; });
 	}
@@ -47,6 +48,7 @@ const watchEditor = (cb = () => { }) =>
 		const addonBuildPath = resolve("engine", "build", "Debug", "addon.node");
 		watch(resolve("engine"), { recursive: true }, (e, name) => 
 		{
+			console.log("\n\nCHANGED\n\n!!");
 			if (name && name.startsWith("build\\Debug\\addon.lib"))
 			{
 				copyTimeout && clearTimeout(copyTimeout);
@@ -92,9 +94,6 @@ const watchEditor = (cb = () => { }) =>
 		else
 		{
 			console.log(stats.toString("minimal"));
-
-			if (editorProc === null)
-				startEditor();
 		}
 		cb(err, stats);
 	});

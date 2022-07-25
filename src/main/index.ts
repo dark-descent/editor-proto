@@ -1,7 +1,12 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
-
 import fs from "fs";
+
+const isDev = process.env.NODE_ENV === "development";
+
+const pkg = __non_webpack_require__(path.resolve(__dirname, isDev ? ".." : ".", "package.json"));
+
+const appDataPath = path.resolve(app.getPath("appData"), pkg.name); 
 
 let browserWindow: BrowserWindow;
 
@@ -34,6 +39,7 @@ app.whenReady().then(() =>
 			contextIsolation: false,
 			devTools: true
 		},
+		title: "Dark Descent - Editor"
 	});
 
 	browserWindow.setMenu(null);
@@ -42,10 +48,10 @@ app.whenReady().then(() =>
 
 	browserWindow.on("ready-to-show", () => 
 	{
-		console.log("READY :D");
 		browserWindow.maximize();
 		browserWindow.show();
 		browserWindow.webContents.openDevTools();
+		console.log("READY :D");
 	});
 });
 
@@ -53,4 +59,9 @@ app.on("window-all-closed", () =>
 {
 	console.log("QUIT :D");
 	app.quit();
+});
+
+ipcMain.on("get-app-data-path", (e) => 
+{
+	e.returnValue = appDataPath;
 });

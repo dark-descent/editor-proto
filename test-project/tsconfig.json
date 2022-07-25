@@ -1,0 +1,35 @@
+{
+	"compilerOptions": {
+		"allowJs": false,
+		"allowSyntheticDefaultImports": true,
+		"baseUrl": "./src",
+		"rootDir": "./src",
+		"downlevelIteration": false,
+		"esModuleInterop": true,
+		"exactOptionalPropertyTypes": false,
+		"experimentalDecorators":true,
+		"importsNotUsedAsValues": "remove",
+		"incremental": true,
+		"allowUmdGlobalAccess": false,
+		"lib": [
+			"ES2015",
+			"ES2016",
+			"ES2017",
+			"ES2018",
+			"ES2019",
+			"ES2020",
+			"ES2021",
+			"ES2022"
+		],
+		"module": "ESNext",
+		"target": "ESNext",
+		"typeRoots": [
+			"./types"
+		],
+		"paths": {
+			"@components/*": [
+				"./src/components/*"
+			]
+		}
+	}
+}
