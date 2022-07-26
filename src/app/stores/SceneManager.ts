@@ -5,41 +5,6 @@ import { PersistentStore } from "./PersistentStore";
 
 export class SceneManager extends PersistentStore<SceneListData>
 {
-	@action
-	public readonly removeScene = (name: string) =>
-	{
-		const index = this.findSceneIndex(name);
-		if (index > -1)
-		{
-			const scenes = [...this.data.scenes];
-			scenes.splice(index, 1);
-			this.set("scenes", scenes);
-			const s = [...this._loadedScenes];
-			this._loadedScenes = s.map(i => 
-			{
-				if (i == index)
-					return -1;
-				else if(i > index)
-					return i - 1;
-				return i;
-			}).filter(i => i > -1);
-			
-			if(this._activeScene == index)
-				this._activeScene = this._loadedScenes.length > 0 ? this._loadedScenes[0]! : -1;
-			else if(this._activeScene > index)
-				this._activeScene -= 1;
-			
-			if(this._activeScene == -1)
-			{
-				this.getStore(AppStore).setTitle();
-			}
-			else
-			{
-				const s = scenes[this._activeScene]!;
-				this.getStore(AppStore).setTitle(s.name);
-			}
-		}
-	}
 	public get name(): string { return "scenes"; }
 
 	@observable
@@ -49,6 +14,13 @@ export class SceneManager extends PersistentStore<SceneListData>
 	private _activeScene: number = -1;
 
 	private readonly menuStore = this.getStore(AppMenuStore);
+
+	private readonly updateMenu = () =>
+	{
+		const item = this.menuStore.items[0]?.subMenuItems[1];
+		if (item instanceof MenuItem)
+			item.setSubMenuItems(this.data.scenes.map((s) => ({ label: s.name, onClick: () => this.loadScene(s.name) })));
+	}
 
 	protected initData(): SceneListData
 	{
@@ -77,6 +49,9 @@ export class SceneManager extends PersistentStore<SceneListData>
 	@action
 	public readonly createScene = (name: string) =>
 	{
+		if (name.length === 0)
+			return false;
+
 		const s = this.findScene(name);
 
 		if (s)
@@ -87,10 +62,8 @@ export class SceneManager extends PersistentStore<SceneListData>
 		this.set("scenes", [...this.data.scenes, scene]);
 		this.loadScene(name);
 
-		const item = this.menuStore.items[0]?.subMenuItems[1];
 
-		if (item instanceof MenuItem)
-			item.setSubMenuItems(this.data.scenes.map((s) => ({ label: s.name, onClick: () => this.loadScene(s.name) })));
+		this.updateMenu();
 
 		return true;
 	}
@@ -120,15 +93,50 @@ export class SceneManager extends PersistentStore<SceneListData>
 		if (index > -1)
 		{
 			const scenes = [...this.data.scenes];
-			console.log(scenes);
-			// scenes[index]!.name = newName;
 
-			// this.set("scenes", scenes);
-			// console.log(scenes);
+			scenes[index]!.name = newName;
 
-			// const item = this.menuStore.items[0]?.subMenuItems[1];
-			// if (item instanceof MenuItem)
-			// item.setSubMenuItems(this.data.scenes.map((s) => ({ label: s.name, onClick: () => this.loadScene(s.name) })));
+			this.set("scenes", scenes);
+
+			this.updateMenu();
+		}
+	}
+
+	@action
+	public readonly removeScene = (name: string) =>
+	{
+		const index = this.findSceneIndex(name);
+		if (index > -1)
+		{
+			const scenes = [...this.data.scenes];
+			scenes.splice(index, 1);
+			this.set("scenes", scenes);
+			const s = [...this._loadedScenes];
+			this._loadedScenes = s.map(i => 
+			{
+				if (i == index)
+					return -1;
+				else if (i > index)
+					return i - 1;
+				return i;
+			}).filter(i => i > -1);
+
+			if (this._activeScene == index)
+				this._activeScene = this._loadedScenes.length > 0 ? this._loadedScenes[0]! : -1;
+			else if (this._activeScene > index)
+				this._activeScene -= 1;
+
+			if (this._activeScene == -1)
+			{
+				this.getStore(AppStore).setTitle();
+			}
+			else
+			{
+				const s = scenes[this._activeScene]!;
+				this.getStore(AppStore).setTitle(s.name);
+			}
+
+			this.updateMenu();
 		}
 	}
 }

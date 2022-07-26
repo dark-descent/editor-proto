@@ -3,7 +3,6 @@ import { RootStore } from "app/stores/RootStore";
 import { SceneManager } from "app/stores/SceneManager";
 import { Button, Container, View } from "app/views";
 import React from "react";
-import { preventEvent } from "utils";
 import { getClassFromProps, useRefState } from "utils/react";
 import { useModal } from "../components";
 
@@ -14,22 +13,34 @@ const CreateSceneModal = withStores({ sceneManager: SceneManager, modalManager: 
 	const modal = useModal();
 
 	const [val, setVal] = React.useState("");
+	const ref = React.useRef<HTMLInputElement | null>();
 
 	const onKeyDown = (e: React.KeyboardEvent) =>
 	{
 		if (e.key === "Enter")
-		{
-			if (sceneManager.createScene(val))
-			{
-				console.log("modal close");
-				modal.close(true);
-			}
-		}
+			modal.close(sceneManager.createScene(val));
 	}
 
+	React.useEffect(() => 
+	{
+		if (ref.current)
+			ref.current.focus();
+	}, []);
+
 	return (
-		<View>
-			<input value={val} onChange={e => setVal(e.target.value)} onKeyDown={onKeyDown} />
+		<View id="create-scene-modal" fill>
+			<Container fill>
+				<View absolute centered="horizontal">
+					<input placeholder="Name" value={val} onChange={e => setVal(e.target.value)} onKeyDown={onKeyDown} ref={(input) => ref.current = input} />
+				</View>
+			</Container>
+			<Container className="btn-wrapper" absolute fill>
+
+				{/* <View className="btn-wrapper"> */}
+				<Button className="btn-cancel" transparent text="Cancel" onClick={() => modal.close()} />
+				<Button className="btn-create" text="Create" onClick={() => modal.close(sceneManager.createScene(val))} />
+				{/* </View> */}
+			</Container>
 		</View>
 	);
 });
@@ -64,8 +75,16 @@ const RenameSceneModal = withStores({ sceneManager: SceneManager, modalManager: 
 	}, []);
 
 	return (
-		<View>
-			<input value={val} onChange={e => setVal(e.target.value)} onKeyDown={onKeyDown} ref={(input) => ref.current = input} />
+		<View id="create-scene-modal" fill>
+			<Container fill>
+				<View absolute centered="horizontal">
+					<input placeholder="Name" value={val} onChange={e => setVal(e.target.value)} onKeyDown={onKeyDown} ref={(input) => ref.current = input} />
+				</View>
+			</Container>
+			<Container className="btn-wrapper" absolute fill>
+				<Button className="btn-cancel" transparent text="Cancel" onClick={() => modal.close()} />
+				<Button className="btn-rename" text="Rename" onClick={() => modal.close(val)} />
+			</Container>
 		</View>
 	);
 });
@@ -84,16 +103,6 @@ const OpenModal = withStores({ sceneManager: SceneManager, modalManager: ModalMa
 	const modal = useModal();
 
 	const [editTarget, setEditTarget, editTargetRef] = useRefState(-1);
-
-	const onWindowClicked = (e: MouseEvent) =>
-	{
-		if (editTargetRef.current > -1)
-		{
-			e.preventDefault();
-			e.stopPropagation();
-			setEditTarget(-1);
-		}
-	};
 
 	const onSceneClick = (name: string) => (e: React.MouseEvent) =>
 	{
@@ -121,7 +130,7 @@ const OpenModal = withStores({ sceneManager: SceneManager, modalManager: ModalMa
 		setEditTarget(-1);
 		renameSceneModal.open(name).then((newName) => 
 		{
-			if(name !== newName)
+			if (name !== newName)
 				sceneManager.renameScene(name, newName);
 		});
 	}
@@ -138,47 +147,53 @@ const OpenModal = withStores({ sceneManager: SceneManager, modalManager: ModalMa
 	}
 
 	return (
-		<Container className="open-modal">
+		<View fill>
 			{sceneManager.data.scenes.length === 0 ? (
-				<View>
-					There are no projects yet!
-					<Button text="Create new" onClick={() => createSceneModal.open().then((sceneCreated) => { if (sceneCreated) modal.close() })} />
-					{/* TODO: <Button text="Sync With Server" /> */}
+				<View className="no-scenes" centered absolute>
+					<View elType="h1">There are no projects yet!</View>
+					<View className="btn-wrapper" centered="horizontal">
+						<Button text="Create new" onClick={() => createSceneModal.open().then((sceneCreated) => { if (sceneCreated) modal.close() })} />
+					</View>
 				</View>
+				/* TODO: <Button text="Sync With Server" /> */
 			) : (
-				<View className="projects-list">
-					<Button text="Create new" onClick={() => createSceneModal.open().then((sceneCreated) => { if (sceneCreated) modal.close() })} />
-					{sceneManager.data.scenes.map((p, i) => 
-					{
-						return (
-							<View key={i} className={getClassFromProps("scene", { active: i === editTarget })} onClick={onSceneClick(p.name)}>
-								{p.name}
-								<View absolute className="edit-btn" onClick={onEditClicked(i)}>
-									<View fill className="inner-btn" />
+				<Container className="open-modal">
+					<View className="projects-list">
+						<View centered="horizontal">
+							<Button className="btn-create-new" text="Create new" onClick={() => createSceneModal.open().then((sceneCreated) => { if (sceneCreated) modal.close() })} />
+						</View>
+						{sceneManager.data.scenes.map((p, i) => 
+						{
+							return (
+								<View key={i} className={getClassFromProps("scene", { active: i === editTarget })} onClick={onSceneClick(p.name)}>
+									{p.name}
+									<View absolute className="edit-btn" onClick={onEditClicked(i)}>
+										<View fill className="inner-btn" />
+									</View>
+									{
+										i === editTarget && (
+											<View absolute className="edit-panel">
+												<View onClick={onRenameClicked(p.name)}>
+													Rename
+												</View>
+												<View onClick={onDeleteClicked(p.name)}>
+													Delete
+												</View>
+											</View>
+										)
+									}
 								</View>
-								{
-									i === editTarget && (
-										<View absolute className="edit-panel">
-											<View onClick={onRenameClicked(p.name)}>
-												Rename
-											</View>
-											<View onClick={onDeleteClicked(p.name)}>
-												Delete
-											</View>
-										</View>
-									)
-								}
-							</View>
-						);
-					})}
-				</View>
+							);
+						})}
+					</View>
+				</Container>
 			)}
 			{editTarget > -1 && (
 				<View className="open-panel-overlay" onClick={onOverlayClicked}>
 
 				</View>
 			)}
-		</Container >
+		</View>
 	);
 });
 

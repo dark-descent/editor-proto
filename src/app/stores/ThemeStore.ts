@@ -9,6 +9,7 @@ export class ThemeStore extends Store
 	private readonly themes: Themes<"dark" | "ligth"> = lock({
 		dark: {
 			font: "sans-serif",
+			accent: "rgb(255,172,68)",
 			main: {
 				background: "rgb(32,32,32)",
 				color: "rgb(220,220,220)"
@@ -35,6 +36,7 @@ export class ThemeStore extends Store
 		},
 		ligth: {
 			font: "sans-serif",
+			accent: "rgb(255,172,68)",
 			main: {
 				background: "rgb(225,225,225)",
 				color: "rgb(64, 64, 64)"
@@ -169,6 +171,7 @@ export type ThemeColor = {
 
 export type Theme = {
 	font: string;
+	accent: Color;
 	main: ThemeColor;
 	sec: ThemeColor;
 	tert: ThemeColor;

@@ -44,7 +44,7 @@ export const Modal = withStore<ModalManager, { modal: ModalStore, isLast: boolea
 			<FlexBox fill vertical primary>
 				<FlexItem base={64}>
 					<View absolute fill className="title-bar">
-						<View type="h1" className="title">{title}</View>
+						<View elType="h1" className="title">{title}</View>
 						{options.closable && canClose() && <View absolute className="close-btn" onClick={modal.close}>
 							<View fill className="inner-btn" />
 						</View>}

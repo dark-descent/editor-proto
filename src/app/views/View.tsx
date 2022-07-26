@@ -3,7 +3,7 @@ import { react } from "utils";
 
 import "./styles/view.scss";
 
-const themeFromProps = (p: ViewTheme) =>
+export const themeFromProps = (p: ViewTheme) =>
 {
 	if (p.tertiary)
 		return "tertiary";
@@ -14,20 +14,20 @@ const themeFromProps = (p: ViewTheme) =>
 	return "inherit";
 }
 
-export const View = ({ elRef, absolute, fixed, fill, centered = false, inline, className, type = "div", suppressHydrationWarning = false, primary, secundary, tertiary, ...rest }: React.PropsWithChildren<ViewProps>) =>
+export const View = ({ elRef, absolute, fixed, fill, centered = false, inline, className, elType = "div", suppressHydrationWarning = false, primary, secundary, tertiary, ...rest }: React.PropsWithChildren<ViewProps>) =>
 {
 	const theme = themeFromProps({ primary, secundary, tertiary } as ViewTheme);
 
 	const cn = react.getClassFromProps("view", { absolute, fixed, centered, fill, inline, className, [theme]: true });
 
-	return React.createElement(type, { ref: elRef, className: cn, suppressHydrationWarning, ...rest });
+	return React.createElement(elType, { ref: elRef, className: cn, suppressHydrationWarning, ...rest });
 }
 
 type ReactProps<T extends HTMLElement> = React.PropsWithChildren<Omit<React.DetailedHTMLProps<React.HTMLAttributes<T>, T>, "ref">>;
 
 export interface IViewProps extends ReactProps<HTMLDivElement>
 {
-	type?: keyof React.ReactHTML;
+	elType?: keyof React.ReactHTML;
 	absolute?: boolean;
 	fixed?: boolean;
 	fill?: boolean;
