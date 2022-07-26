@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import { ipcRenderer } from "electron";
 
-export abstract class PersistentStore<Data extends {}> extends Store
+export abstract class PersistentStore<Data extends {}, Props extends {} = {}> extends Store<Props>
 {
 	public static readonly appDataPath = ipcRenderer.sendSync("get-app-data-path");
 

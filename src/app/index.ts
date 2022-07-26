@@ -8,6 +8,8 @@ import { RootStore } from "./stores/RootStore";
 
 import { Engine } from "@engine";
 import { AppStore } from "./stores/AppStore";
+import { ProjectStore } from "./stores/ProjectStore";
+import { openProjectModal } from "./modals/ProjectModal";
 
 const rootEl = document.createElement("div");
 rootEl.id = "root";
@@ -40,6 +42,9 @@ const InitializedApp = await RootStore.withApp(App, async (root, init) =>
 	init(PanelManager, testLayout);
 	init(AppMenuStore, createMenuLayout(root));
 	init(AppStore, { engine });
+
+	if(!root.get(ProjectStore).isLoaded)
+		openProjectModal.open();
 });
 
 root.render(React.createElement(InitializedApp));

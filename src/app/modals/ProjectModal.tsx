@@ -2,24 +2,42 @@ import { Modal, ModalManager, withStore, withStores } from "app/stores";
 import { ProjectStore } from "app/stores/ProjectStore";
 import { RootStore } from "app/stores/RootStore";
 import { SceneManager } from "app/stores/SceneManager";
-import { Button, Container, View } from "app/views";
+import { Button, Container, FlexBox, FlexItem, View } from "app/views";
+import { ipcRenderer } from "electron";
 import React from "react";
 import { getClassFromProps, useRefState } from "utils/react";
 import { useModal } from "../components";
+import { openSceneModal } from "./OpenModal";
 
-import "./styles/open-modal.scss";
+import "./styles/open-project-modal.scss";
 
-const CreateSceneModal = withStores({ sceneManager: SceneManager, modalManager: ModalManager }, ({ sceneManager, modalManager }) =>
+const CreateProjectModal = withStores({ projectStore: ProjectStore }, ({ projectStore }) =>
 {
 	const modal = useModal();
 
-	const [val, setVal] = React.useState("");
+	const [nameVal, setNameVal] = React.useState("");
+	const [dirVal, setDirVal] = React.useState("");
+
 	const ref = React.useRef<HTMLInputElement | null>();
 
-	const onKeyDown = (e: React.KeyboardEvent) =>
+	const onNameKeyDown = (e: React.KeyboardEvent) =>
 	{
 		if (e.key === "Enter")
-			modal.close(sceneManager.createScene(val));
+			modal.close(projectStore.create(nameVal, dirVal));
+	}
+
+	const onDirKeyDown = (e: React.KeyboardEvent) =>
+	{
+		if (e.key === "Enter")
+			modal.close(projectStore.create(nameVal, dirVal));
+	}
+
+	const onDirClicked = () =>
+	{
+		ipcRenderer.invoke("get-dir").then((val) => 
+		{
+			setDirVal(val);
+		});
 	}
 
 	React.useEffect(() => 
@@ -29,33 +47,51 @@ const CreateSceneModal = withStores({ sceneManager: SceneManager, modalManager: 
 	}, []);
 
 	return (
-		<View id="create-scene-modal" fill>
+		<View id="create-project-modal" fill>
 			<Container fill>
-				<View absolute centered="horizontal">
-					<input placeholder="Name" value={val} onChange={e => setVal(e.target.value)} onKeyDown={onKeyDown} ref={(input) => ref.current = input} />
-				</View>
+				<FlexBox fill vertical absolute className="input-wrapper">
+					<FlexItem>
+						<View fill>
+							<Container fill>
+								<input placeholder="Name" value={nameVal} onChange={e => setNameVal(e.target.value)} onKeyDown={onNameKeyDown} ref={(input) => ref.current = input} />
+							</Container>
+						</View>
+					</FlexItem>
+					<FlexItem>
+						<Container fill>
+							<FlexBox style={{ alignItems: "baseline" }}>
+								<FlexItem base={285}>
+									<input className="dir-input" type="text" placeholder="Dir" value={dirVal} onChange={e => setDirVal(e.target.value)} onKeyDown={onDirKeyDown} ref={(input) => ref.current = input} />
+								</FlexItem>
+								<FlexItem>
+									<Button className="btn-get-dir" text="Select Folder" onClick={onDirClicked} />
+								</FlexItem>
+							</FlexBox>
+						</Container>
+					</FlexItem>
+				</FlexBox>
 			</Container>
 			<Container className="btn-wrapper" absolute fill>
 
 				{/* <View className="btn-wrapper"> */}
 				<Button className="btn-cancel" transparent text="Cancel" onClick={() => modal.close()} />
-				<Button className="btn-create" text="Create" onClick={() => modal.close(sceneManager.createScene(val))} />
+				<Button className="btn-create" text="Create" onClick={() => modal.close(projectStore.create(nameVal, dirVal))} />
 				{/* </View> */}
 			</Container>
 		</View>
 	);
 });
 
-export const createSceneModal = Modal.create({
-	Component: CreateSceneModal,
-	title: "Create Scene",
-	maxWidth: 320,
-	maxHeight: 220,
-	minWidth: 320,
-	minHeight: 220
+export const createProjectModal = Modal.create({
+	Component: CreateProjectModal,
+	title: "Create Project",
+	maxWidth: 420,
+	maxHeight: 320,
+	minWidth: 420,
+	minHeight: 320
 });
 
-const RenameSceneModal = withStores({ sceneManager: SceneManager, modalManager: ModalManager }, ({ sceneManager, modalManager }) =>
+const RenameProjectModal = withStores({ sceneManager: SceneManager, modalManager: ModalManager }, ({ sceneManager, modalManager }) =>
 {
 	const modal = useModal();
 
@@ -90,27 +126,28 @@ const RenameSceneModal = withStores({ sceneManager: SceneManager, modalManager: 
 	);
 });
 
-export const renameSceneModal = Modal.create({
-	Component: RenameSceneModal,
-	title: "Rename Scene",
+export const renameProjectModal = Modal.create({
+	Component: RenameProjectModal,
+	title: "Rename Project",
 	maxWidth: 320,
 	maxHeight: 220,
 	minWidth: 320,
 	minHeight: 220
 });
 
-const OpenModal = withStore(SceneManager, ({ store }) =>
+const OpenModal = withStore(ProjectStore, ({ store }) =>
 {
 	const modal = useModal();
 
 	const [editTarget, setEditTarget, editTargetRef] = useRefState(-1);
 
-	const onSceneClick = (name: string) => (e: React.MouseEvent) =>
+	const onProjectClick = (dir: string) => (e: React.MouseEvent) =>
 	{
 		if (editTarget === -1)
 		{
-			store.loadScene(name);
+			store.load(dir);
 			modal.close();
+			openSceneModal.open();
 		}
 	}
 
@@ -129,16 +166,16 @@ const OpenModal = withStore(SceneManager, ({ store }) =>
 		e.preventDefault();
 		e.stopPropagation();
 		setEditTarget(-1);
-		renameSceneModal.open(name).then((newName) => 
+		renameProjectModal.open(name).then((newName) => 
 		{
 			if (name !== newName)
-				store.renameScene(name, newName);
+				store.rename(name, newName);
 		});
 	}
 
-	const onDeleteClicked = (name: string) => () =>
+	const onDeleteClicked = (dir: string) => () =>
 	{
-		store.removeScene(name);
+		store.remove(dir);
 		setEditTarget(-1);
 	}
 
@@ -149,11 +186,11 @@ const OpenModal = withStore(SceneManager, ({ store }) =>
 
 	return (
 		<View fill>
-			{store.data.scenes.length === 0 ? (
+			{store.data.projects.length === 0 ? (
 				<View className="no-scenes" centered absolute>
 					<View elType="h1">There are no projects yet!</View>
 					<View className="btn-wrapper" centered="horizontal">
-						<Button text="Create new" onClick={() => createSceneModal.open().then((sceneCreated) => { if (sceneCreated) modal.close() })} />
+						<Button text="Create new" onClick={() => createProjectModal.open().then((projectCreated) => { if (projectCreated) modal.close() })} />
 					</View>
 				</View>
 				/* TODO: <Button text="Sync With Server" /> */
@@ -161,13 +198,14 @@ const OpenModal = withStore(SceneManager, ({ store }) =>
 				<Container className="open-modal">
 					<View className="projects-list">
 						<View centered="horizontal">
-							<Button className="btn-create-new" text="Create new" onClick={() => createSceneModal.open().then((sceneCreated) => { if (sceneCreated) modal.close() })} />
+							<Button className="btn-create-new" text="Create new" onClick={() => createProjectModal.open().then((projectCreated) => { if (projectCreated) modal.close() })} />
 						</View>
-						{store.data.scenes.map((p, i) => 
+						{store.data.projects.map((p, i) => 
 						{
 							return (
-								<View key={i} className={getClassFromProps("scene", { active: i === editTarget })} onClick={onSceneClick(p.name)}>
-									{p.name}
+								<View key={i} className={getClassFromProps("scene", { active: i === editTarget })} onClick={onProjectClick(p.dir)}>
+									<View>{p.name}</View>
+									<View>{p.dir}</View>
 									<View absolute className="edit-btn" onClick={onEditClicked(i)}>
 										<View fill className="inner-btn" />
 									</View>
@@ -177,7 +215,7 @@ const OpenModal = withStore(SceneManager, ({ store }) =>
 												<View onClick={onRenameClicked(p.name)}>
 													Rename
 												</View>
-												<View onClick={onDeleteClicked(p.name)}>
+												<View onClick={onDeleteClicked(p.dir)}>
 													Delete
 												</View>
 											</View>
@@ -198,8 +236,8 @@ const OpenModal = withStore(SceneManager, ({ store }) =>
 	);
 });
 
-export const openSceneModal = Modal.create({
+export const openProjectModal = Modal.create({
 	Component: OpenModal,
-	title: "Scenes",
-	canClose: () => RootStore.get(SceneManager).loadedScenes.length > 0,
+	title: "Projects",
+	canClose: () => RootStore.get(ProjectStore).isLoaded,
 }, false);

@@ -39,7 +39,7 @@ export class Store<P extends {} = {}>
 	}
 
 
-	protected init(props: Partial<P>) { }
+	protected init(props: P) { }
 
 	protected onMount() { }
 }

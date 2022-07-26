@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import path from "path";
 import fs from "fs";
 
@@ -6,7 +6,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 const pkg = __non_webpack_require__(path.resolve(__dirname, isDev ? ".." : ".", "package.json"));
 
-const appDataPath = path.resolve(app.getPath("appData"), pkg.name); 
+const appDataPath = path.resolve(app.getPath("appData"), pkg.name);
 
 let browserWindow: BrowserWindow;
 
@@ -41,7 +41,7 @@ app.whenReady().then(() =>
 		},
 		title: "Dark Descent - Editor"
 	});
-	
+
 
 	browserWindow.setMenu(null);
 
@@ -65,4 +65,13 @@ app.on("window-all-closed", () =>
 ipcMain.on("get-app-data-path", (e) => 
 {
 	e.returnValue = appDataPath;
+});
+
+ipcMain.handle("get-dir", async (e) => 
+{
+	const result = await dialog.showOpenDialog(browserWindow, {
+		properties: ['openDirectory'],
+	});
+	e.returnValue = result.filePaths[0];
+	return result.filePaths[0];
 });
