@@ -28,6 +28,10 @@ export class Modal
 
 	public readonly canClose: () => boolean;
 
+	private _openValue: any = undefined;
+
+	public get openValue() { return this._openValue; }
+
 	public constructor(props: ModalProps, initiallyOpen: boolean = false)
 	{
 		const { title, Component, canClose, ...options } = props;
@@ -44,9 +48,10 @@ export class Modal
 			this.modalManager.open(this);
 	}
 
-	public readonly open = () => 
+	public readonly open = (openValue: any = undefined) => 
 	{
 		this.modalManager.open(this);
+		this._openValue = openValue;
 		return new Promise<any>((resolve, reject) =>
 		{
 			if (this.openPromiseResolver !== null && this.openPromiseRejecter)
@@ -143,10 +148,14 @@ export class ModalManager extends Store
 	}
 
 	@action
-	public closeTopModal = () =>
+	public closeTopModal = (e?: React.MouseEvent | MouseEvent) =>
 	{
 		if (this._openModals.length !== 0)
+		{
 			this._openModals[this._openModals.length - 1]?.close();
+			e?.preventDefault();
+			e?.stopPropagation();
+		}
 	}
 
 	@action flushUpdates = () => this._openModals = [...this._openModals];

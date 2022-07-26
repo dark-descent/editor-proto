@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import React from "react";
 import { preventEvent } from "utils";
 import { getClassFromProps } from "utils/react";
-import { Modal as ModalStore , ModalOptions } from "../stores";
+import { Modal as ModalStore , ModalManager, ModalOptions, withStore } from "../stores";
 import { FlexBox, FlexItem, View } from "../views";
 
 import "./styles/modal.scss";
@@ -33,12 +33,10 @@ export const useModal = (): ModalStore =>
 	return modal;
 }
 
-export const Modal = observer(({ modal, isLast }: { modal: ModalStore, isLast: boolean }) =>
+export const Modal = withStore<ModalManager, { modal: ModalStore, isLast: boolean }>(ModalManager, ({ store, modal, isLast }) =>
 {
 	const { Component, title, options, canClose } = modal;
 	
-	
-
 	const style = React.useMemo(() => parseStyleOptions(options), []);
 
 	return (
@@ -60,7 +58,7 @@ export const Modal = observer(({ modal, isLast }: { modal: ModalStore, isLast: b
 					</View>
 				</FlexItem>
 			</FlexBox>
-			<View absolute fill className={getClassFromProps("blur-layer", { show: !isLast })} />
+			<View absolute fill className={getClassFromProps("blur-layer", { show: !isLast })} onClick={store.closeTopModal}/>
 		</View>
 	);
 });
