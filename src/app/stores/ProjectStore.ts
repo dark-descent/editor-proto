@@ -3,6 +3,7 @@ import path from "path";
 import { PersistentStore } from "./PersistentStore";
 import { RootStore } from "./RootStore";
 import fs from "fs";
+import { Engine, EngineConfig } from "../../../engine/src/Engine";
 
 const notEmpty = <T>(obj: any): obj is T => (typeof obj === "object" && Object.keys(obj).length !== 0);
 
@@ -36,6 +37,10 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 	@observable
 	private _activeScene: Scene | null = null;
 
+	private _engine: Engine | null = null;
+
+	public get engine(): Engine { if (!this._engine) throw new Error("Engine is not initialized!"); return this._engine; }
+
 	public readonly iterateScenes = <R>(iterator: (sceneInfo: SceneData, index: number) => R): R[] =>
 	{
 		const scenes = this.get("scenes");
@@ -50,9 +55,10 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 		};
 	}
 
-	protected override init()
+	public readonly initializeEngine = async (config: EngineConfig) =>
 	{
-
+		if (!this._engine)
+			this._engine = await Engine.initialize(config);
 	}
 
 	private readonly createScenePath = (scenePath: string) => path.resolve(this.dir, "scenes", scenePath);
@@ -110,18 +116,6 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 	}
 }
 
-
-
-type SceneData = {
-	name: string;
-	path: string;
-};
-
-type ProjectData = {
-	name: string;
-	scenes: { [key: string]: string };
-};
-
 export class ProjectManagerStore extends PersistentStore<ProjectListData, ProjectStoreProps | {}>
 {
 	@observable
@@ -129,6 +123,15 @@ export class ProjectManagerStore extends PersistentStore<ProjectListData, Projec
 
 	@computed
 	public get current() { return this._loadedProject; }
+
+	@observable
+	private _loadingProject: string = "";
+
+	@computed
+	public get isLoading() { return this._loadingProject !== ""; }
+
+	@computed
+	public get loadingProject() { return this._loadingProject; }
 
 	public constructor(root: RootStore)
 	{
@@ -162,16 +165,29 @@ export class ProjectManagerStore extends PersistentStore<ProjectListData, Projec
 	}
 
 	@action
-	public readonly load = (dir: string): boolean =>
+	public readonly setLoadingProjectName = (name: string) => this._loadingProject = name;
+
+	@action
+	public readonly load = (dir: string): Promise<boolean> => 
 	{
 		const p = this.findProject(dir);
 		if (p)
 		{
-			this._loadedProject = makeObservable(new Project(this.rootStore, path.resolve(dir, "project.json"), { name: p.name, scenes: {} }));
-			return true;
+			this._loadingProject = p.name;
+			return new Promise<boolean>(action((res) => 
+			{
+				this._loadedProject = makeObservable(new Project(this.rootStore, path.resolve(dir, "project.json"), { name: p.name, scenes: {} }));
+				this._loadedProject.initializeEngine({
+					gameName: p.name,
+				}).then(() => 
+				{
+					this.setLoadingProjectName("");
+					res(true);
+				});
+			}));
 		}
-		return false;
-	}
+		return new Promise((res) => res(false));
+	};
 
 	@action
 	public readonly remove = (dir: string) =>
@@ -190,8 +206,6 @@ export class ProjectManagerStore extends PersistentStore<ProjectListData, Projec
 	public readonly rename = (name: string, newName: string) =>
 	{
 		const index = this.data.projects.findIndex(p => p.name === name);
-
-		console.log("rename scene from ", name, "to", newName, "at index", index);
 
 		if (index > -1)
 		{
@@ -215,4 +229,14 @@ type ProjectInfo = {
 
 type ProjectListData = {
 	projects: ProjectInfo[]
+};
+
+type SceneData = {
+	name: string;
+	path: string;
+};
+
+type ProjectData = {
+	name: string;
+	scenes: { [key: string]: string };
 };

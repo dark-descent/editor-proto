@@ -8,7 +8,7 @@ import { observer } from "mobx-react";
 import React from "react";
 import { getClassFromProps, useRefState } from "utils/react";
 import { useModal } from "../components";
-import { openSceneModal } from "./OpenModal";
+import { openSceneModal } from "./SceneModal";
 
 import "./styles/open-project-modal.scss";
 
@@ -146,11 +146,14 @@ const OpenModal = withStore(ProjectManagerStore, ({ store }) =>
 	{
 		if (editTarget === -1)
 		{
-			if(store.load(dir))
+			store.load(dir).then((loaded) => 
 			{
-				modal.close();
-				openSceneModal.open();
-			}
+				if(loaded)
+				{
+					modal.close();
+					openSceneModal.open();
+				}
+			});
 		}
 	}
 
@@ -224,6 +227,10 @@ const OpenModal = withStore(ProjectManagerStore, ({ store }) =>
 											</View>
 										)
 									}
+									{store.loadingProject === p.name && <View absolute>
+										Loading
+										{/* <img src="" /> */}
+									</View>}
 								</View>
 							);
 						})}

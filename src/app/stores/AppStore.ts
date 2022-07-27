@@ -1,20 +1,12 @@
 import { action, observable } from "mobx";
-import { Engine } from "../../../engine/src/Engine";
 import { Store } from "./Store";
 
-export class AppStore extends Store<{ engine: Engine }>
+export class AppStore extends Store
 {
 	private static readonly TITLE = document.title;
 
 	@observable
 	private _title: string = AppStore.TITLE;
-
-	private _engine!: Engine;
-
-	protected override init({ engine }: { engine: Engine }): void
-	{
-		this._engine = engine;
-	}
 
 	@action
 	public readonly setTitle = (...titles: string[]) => 

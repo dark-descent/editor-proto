@@ -19,29 +19,8 @@ const root = ReactDOM.createRoot(rootEl);
 
 const InitializedApp = await RootStore.withApp(App, async (root, init) => 
 {
-	const engine = await Engine.initialize({
-		gameName: "Dark Descent",
-		logHandler: (level, msg) => 
-		{
-			switch (level)
-			{
-				case "exception":
-				case "error":
-					console.error(msg);
-					break;
-				case "info":
-					console.info(msg);
-					break;
-				case "warn":
-					console.warn(msg);
-					break;
-			}
-		}
-	});
-
 	init(PanelManager, testLayout);
 	init(AppMenuStore, createMenuLayout(root));
-	init(AppStore, { engine });
 
 	if(!root.get(ProjectManagerStore).current)
 		openProjectModal.open();
