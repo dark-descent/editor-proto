@@ -28,6 +28,8 @@ export class Store<P extends {} = {}>
 
 	public static readonly preload = (ctor: any) => { RootStore.instance.get(ctor); };
 
+	public static readonly requiredProps = (ctor: any) => { ctor.__REQUIRED_PROPS__ = true; };
+
 	public readonly rootStore: RootStore;
 
 	protected readonly getStore: <T extends Store<P>, P extends {}>(storeType: StoreType<T>) => T;
@@ -44,4 +46,4 @@ export class Store<P extends {} = {}>
 	protected onMount() { }
 }
 
-export type StoreType<T extends Store> = new (root: RootStore,) => T;
+export type StoreType<T extends Store> = new (root: RootStore, ...args: any[]) => T;

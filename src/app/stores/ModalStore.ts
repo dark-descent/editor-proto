@@ -26,7 +26,7 @@ export class Modal
 	@computed
 	public get Component() { return this._Component; }
 
-	public readonly canClose: () => boolean;
+	public readonly canClose: () => (boolean | null | undefined);
 
 	private _openValue: any = undefined;
 
@@ -92,7 +92,7 @@ export class Modal
 type ModalProps = {
 	Component: React.FC<any>;
 	title: string;
-	canClose?: () => boolean;
+	canClose?: () => (boolean | null | undefined);
 } & ModalOptions;
 
 export type ModalOptions = {

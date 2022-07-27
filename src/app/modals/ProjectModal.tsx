@@ -1,9 +1,10 @@
 import { Modal, ModalManager, withStore, withStores } from "app/stores";
-import { ProjectStore } from "app/stores/ProjectStore";
+import { ProjectManagerStore } from "app/stores/ProjectStore";
 import { RootStore } from "app/stores/RootStore";
-import { SceneManager } from "app/stores/SceneManager";
+
 import { Button, Container, FlexBox, FlexItem, View } from "app/views";
 import { ipcRenderer } from "electron";
+import { observer } from "mobx-react";
 import React from "react";
 import { getClassFromProps, useRefState } from "utils/react";
 import { useModal } from "../components";
@@ -11,7 +12,7 @@ import { openSceneModal } from "./OpenModal";
 
 import "./styles/open-project-modal.scss";
 
-const CreateProjectModal = withStores({ projectStore: ProjectStore }, ({ projectStore }) =>
+const CreateProjectModal = withStores({ projectStore: ProjectManagerStore }, ({ projectStore }) =>
 {
 	const modal = useModal();
 
@@ -91,7 +92,7 @@ export const createProjectModal = Modal.create({
 	minHeight: 320
 });
 
-const RenameProjectModal = withStores({ sceneManager: SceneManager, modalManager: ModalManager }, ({ sceneManager, modalManager }) =>
+const RenameProjectModal = observer(() =>
 {
 	const modal = useModal();
 
@@ -135,7 +136,7 @@ export const renameProjectModal = Modal.create({
 	minHeight: 220
 });
 
-const OpenModal = withStore(ProjectStore, ({ store }) =>
+const OpenModal = withStore(ProjectManagerStore, ({ store }) =>
 {
 	const modal = useModal();
 
@@ -239,5 +240,5 @@ const OpenModal = withStore(ProjectStore, ({ store }) =>
 export const openProjectModal = Modal.create({
 	Component: OpenModal,
 	title: "Projects",
-	canClose: () => RootStore.get(ProjectStore).isLoaded,
-}, false);
+	canClose: () => !!RootStore.get(ProjectManagerStore).current,
+}, !RootStore.get(ProjectManagerStore).current);

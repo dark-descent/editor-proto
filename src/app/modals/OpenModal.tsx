@@ -1,17 +1,19 @@
 import { Modal, ModalManager, withStore, withStores } from "app/stores";
-import { ProjectStore } from "app/stores/ProjectStore";
+import { ProjectManagerStore } from "app/stores/ProjectStore";
 import { RootStore } from "app/stores/RootStore";
-import { SceneManager } from "app/stores/SceneManager";
 import { Button, Container, View } from "app/views";
+import { observer } from "mobx-react-lite";
 import React from "react";
 import { getClassFromProps, useRefState } from "utils/react";
 import { useModal } from "../components";
 
 import "./styles/open-modal.scss";
 
-const CreateSceneModal = withStores({ sceneManager: SceneManager, modalManager: ModalManager }, ({ sceneManager, modalManager }) =>
+const CreateSceneModal = withStore(ProjectManagerStore, ({ store }) =>
 {
 	const modal = useModal();
+
+	
 
 	const [val, setVal] = React.useState("");
 	const ref = React.useRef<HTMLInputElement | null>();
@@ -19,7 +21,7 @@ const CreateSceneModal = withStores({ sceneManager: SceneManager, modalManager: 
 	const onKeyDown = (e: React.KeyboardEvent) =>
 	{
 		if (e.key === "Enter")
-			modal.close(sceneManager.createScene(val));
+			modal.close(store.current?.createScene(val));
 	}
 
 	React.useEffect(() => 
@@ -39,7 +41,7 @@ const CreateSceneModal = withStores({ sceneManager: SceneManager, modalManager: 
 
 				{/* <View className="btn-wrapper"> */}
 				<Button className="btn-cancel" transparent text="Cancel" onClick={() => modal.close()} />
-				<Button className="btn-create" text="Create" onClick={() => modal.close(sceneManager.createScene(val))} />
+				<Button className="btn-create" text="Create" onClick={() => modal.close(store.current?.createScene(val))} />
 				{/* </View> */}
 			</Container>
 		</View>
@@ -55,7 +57,7 @@ export const createSceneModal = Modal.create({
 	minHeight: 220
 });
 
-const RenameSceneModal = withStores({ sceneManager: SceneManager, modalManager: ModalManager }, ({ sceneManager, modalManager }) =>
+const RenameSceneModal = observer(() =>
 {
 	const modal = useModal();
 
@@ -99,7 +101,7 @@ export const renameSceneModal = Modal.create({
 	minHeight: 220
 });
 
-const OpenModal = withStore(SceneManager, ({ store }) =>
+const OpenModal = withStore(ProjectManagerStore, ({ store }) =>
 {
 	const modal = useModal();
 
@@ -109,7 +111,7 @@ const OpenModal = withStore(SceneManager, ({ store }) =>
 	{
 		if (editTarget === -1)
 		{
-			store.loadScene(name);
+			store.current?.loadScene(name);
 			modal.close();
 		}
 	}
@@ -132,24 +134,25 @@ const OpenModal = withStore(SceneManager, ({ store }) =>
 		renameSceneModal.open(name).then((newName) => 
 		{
 			if (name !== newName)
-				store.renameScene(name, newName);
+				store.current?.renameScene(name, newName);
 		});
 	}
 
 	const onDeleteClicked = (name: string) => () =>
 	{
-		store.removeScene(name);
+		store.current?.removeScene(name);
 		setEditTarget(-1);
 	}
 
 	const onOverlayClicked = () =>
 	{
 		setEditTarget(-1);
+	
 	}
-
+	
 	return (
 		<View fill>
-			{store.data.scenes.length === 0 ? (
+			{store.current?.hasScenes ? (
 				<View className="no-scenes" centered absolute>
 					<View elType="h1">There are no projects yet!</View>
 					<View className="btn-wrapper" centered="horizontal">
@@ -163,7 +166,7 @@ const OpenModal = withStore(SceneManager, ({ store }) =>
 						<View centered="horizontal">
 							<Button className="btn-create-new" text="Create new" onClick={() => createSceneModal.open().then((sceneCreated) => { if (sceneCreated) modal.close() })} />
 						</View>
-						{store.data.scenes.map((p, i) => 
+						{store.current?.iterateScenes((p, i) => 
 						{
 							return (
 								<View key={i} className={getClassFromProps("scene", { active: i === editTarget })} onClick={onSceneClick(p.name)}>
@@ -201,5 +204,5 @@ const OpenModal = withStore(SceneManager, ({ store }) =>
 export const openSceneModal = Modal.create({
 	Component: OpenModal,
 	title: "Scenes",
-	canClose: () => RootStore.get(SceneManager).loadedScenes.length > 0,
+	canClose: () => RootStore.get(ProjectManagerStore).current?.hasScenes,
 }, false);

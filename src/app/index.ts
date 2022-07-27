@@ -8,7 +8,7 @@ import { RootStore } from "./stores/RootStore";
 
 import { Engine } from "@engine";
 import { AppStore } from "./stores/AppStore";
-import { ProjectStore } from "./stores/ProjectStore";
+import { ProjectManagerStore } from "./stores/ProjectStore";
 import { openProjectModal } from "./modals/ProjectModal";
 
 const rootEl = document.createElement("div");
@@ -43,7 +43,7 @@ const InitializedApp = await RootStore.withApp(App, async (root, init) =>
 	init(AppMenuStore, createMenuLayout(root));
 	init(AppStore, { engine });
 
-	if(!root.get(ProjectStore).isLoaded)
+	if(!root.get(ProjectManagerStore).current)
 		openProjectModal.open();
 });
 
