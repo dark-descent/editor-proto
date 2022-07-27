@@ -2,6 +2,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import path from "path";
 import { PersistentStore } from "./PersistentStore";
 import { RootStore } from "./RootStore";
+import fs from "fs";
 
 const notEmpty = <T>(obj: any): obj is T => (typeof obj === "object" && Object.keys(obj).length !== 0);
 
@@ -54,6 +55,8 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 
 	}
 
+	private readonly createScenePath = (scenePath: string) => path.resolve(this.dir, "scenes", scenePath);
+
 	public readonly createScene = (name: string) =>
 	{
 		const scenes = this.get("scenes");
@@ -71,7 +74,7 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 		const scenePath = this.data.scenes[name];
 		if (scenePath)
 		{
-			this._activeScene = makeObservable(new Scene(this.rootStore, path.resolve(this.dir, "scenes", scenePath), {}));
+			this._activeScene = makeObservable(new Scene(this.rootStore, this.createScenePath(scenePath), {}));
 			return true;
 		}
 		return false;
@@ -79,12 +82,31 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 
 	public readonly renameScene = (name: string, newName: string) =>
 	{
-
+		this.update("scenes", (scenes) => 
+		{
+			const s = scenes[name];
+			if (s)
+			{
+				scenes[newName] = s;
+				delete scenes[name];
+			}
+			return scenes;
+		});
 	}
 
 	public readonly removeScene = (name: string) =>
 	{
-
+		this.update("scenes", (scenes) => 
+		{
+			if (scenes[name])
+			{
+				const p = scenes[name]!;
+				const dir = this.createScenePath(p);
+				fs.existsSync(dir) && fs.unlinkSync(dir); // TODO: change to async
+				delete scenes[name];
+			}
+			return scenes;
+		});
 	}
 }
 
