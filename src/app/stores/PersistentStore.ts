@@ -3,6 +3,7 @@ import { RootStore } from "./RootStore";
 import { Store } from "./Store";
 
 import fs from "fs";
+import { dirname } from "path";
 import { ipcRenderer } from "electron";
 
 export abstract class PersistentStore<Data extends {}, Props extends {} = {}> extends Store<Props>
@@ -13,16 +14,22 @@ export abstract class PersistentStore<Data extends {}, Props extends {} = {}> ex
 	private _data: Data;
 
 	public readonly path: string;
+	public readonly dir: string;
 
 	protected abstract initData(): Data;
 
-	public constructor(root: RootStore, path: string)
+	public constructor(root: RootStore, path: string, initData?: Data)
 	{
 		super(root);
 		this.path = path;
+		this.dir = dirname(path);
+		
+		if(!fs.existsSync(this.dir))
+			fs.mkdirSync(this.dir, { recursive: true });
+
 		if (!fs.existsSync(this.path))
 		{
-			const data = this.initData();
+			const data = initData || this.initData();
 			fs.writeFileSync(this.path, JSON.stringify(data), "utf-8");
 			this._data = data;
 		}
@@ -70,7 +77,5 @@ export abstract class PersistentStore<Data extends {}, Props extends {} = {}> ex
 		}
 	}
 }
-
-type Updater<Data extends {}> = (<K extends keyof Data>(key: K, updater: (value: Data[K]) => Data[K]) => void) | ((data: Partial<Data>) => void);
 
 export type PersistentData<T> = T extends PersistentStore<infer D> ? D : never;

@@ -13,15 +13,19 @@ const CreateSceneModal = withStore(ProjectManagerStore, ({ store }) =>
 {
 	const modal = useModal();
 
-	
-
 	const [val, setVal] = React.useState("");
 	const ref = React.useRef<HTMLInputElement | null>();
 
 	const onKeyDown = (e: React.KeyboardEvent) =>
 	{
 		if (e.key === "Enter")
-			modal.close(store.current?.createScene(val));
+			checkAndClose();
+	}
+
+	const checkAndClose = () =>
+	{
+		if (store.current?.createScene(val))
+			modal.close(val);
 	}
 
 	React.useEffect(() => 
@@ -41,7 +45,7 @@ const CreateSceneModal = withStore(ProjectManagerStore, ({ store }) =>
 
 				{/* <View className="btn-wrapper"> */}
 				<Button className="btn-cancel" transparent text="Cancel" onClick={() => modal.close()} />
-				<Button className="btn-create" text="Create" onClick={() => modal.close(store.current?.createScene(val))} />
+				<Button className="btn-create" text="Create" onClick={checkAndClose} />
 				{/* </View> */}
 			</Container>
 		</View>
@@ -111,8 +115,10 @@ const OpenModal = withStore(ProjectManagerStore, ({ store }) =>
 	{
 		if (editTarget === -1)
 		{
-			store.current?.loadScene(name);
-			modal.close();
+			if (store.current?.loadScene(name))
+			{
+				modal.close();
+			}
 		}
 	}
 
@@ -147,16 +153,41 @@ const OpenModal = withStore(ProjectManagerStore, ({ store }) =>
 	const onOverlayClicked = () =>
 	{
 		setEditTarget(-1);
-	
+
 	}
-	
+
+	const onSceneCreated = () =>
+	{
+		createSceneModal.open().then((sceneName) =>
+		{
+			if (typeof sceneName === "string")
+			{
+				if (store.current?.loadScene(sceneName))
+				{
+					modal.close()
+				}
+			}
+		});
+	}
+
+	if (!store.current)
+	{
+		return (
+			<View fill>
+				<View centered absolute>
+					<h1>No project is loaded!</h1>
+				</View>
+			</View>
+		)
+	}
+
 	return (
 		<View fill>
-			{store.current?.hasScenes ? (
+			{!store.current.hasScenes ? (
 				<View className="no-scenes" centered absolute>
-					<View elType="h1">There are no projects yet!</View>
+					<View elType="h1">There are no scenes yet!</View>
 					<View className="btn-wrapper" centered="horizontal">
-						<Button text="Create new" onClick={() => createSceneModal.open().then((sceneCreated) => { if (sceneCreated) modal.close() })} />
+						<Button text="Create new" onClick={onSceneCreated} />
 					</View>
 				</View>
 				/* TODO: <Button text="Sync With Server" /> */
@@ -164,9 +195,9 @@ const OpenModal = withStore(ProjectManagerStore, ({ store }) =>
 				<Container className="open-modal">
 					<View className="projects-list">
 						<View centered="horizontal">
-							<Button className="btn-create-new" text="Create new" onClick={() => createSceneModal.open().then((sceneCreated) => { if (sceneCreated) modal.close() })} />
+							<Button className="btn-create-new" text="Create new" onClick={onSceneCreated} />
 						</View>
-						{store.current?.iterateScenes((p, i) => 
+						{store.current.iterateScenes((p, i) => 
 						{
 							return (
 								<View key={i} className={getClassFromProps("scene", { active: i === editTarget })} onClick={onSceneClick(p.name)}>
@@ -205,4 +236,4 @@ export const openSceneModal = Modal.create({
 	Component: OpenModal,
 	title: "Scenes",
 	canClose: () => RootStore.get(ProjectManagerStore).current?.hasScenes,
-}, false);
+});

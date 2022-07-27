@@ -1,24 +1,20 @@
-import { action, computed, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import path from "path";
 import { PersistentStore } from "./PersistentStore";
 import { RootStore } from "./RootStore";
 
 const notEmpty = <T>(obj: any): obj is T => (typeof obj === "object" && Object.keys(obj).length !== 0);
 
-class Scene extends PersistentStore<SceneData, SceneData | {}>
+class Scene extends PersistentStore<{}>
 {
-	protected initData(): SceneData
+	protected initData()
 	{
-		return {
-			name: "",
-			path: ""
-		};
+		return {};
 	}
 
-	protected override init(props: SceneData | {})
+	protected override init()
 	{
-		if (notEmpty<SceneData>(props))
-			this.update(props);
+
 	}
 }
 
@@ -36,6 +32,9 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 		return this.sceneCount > 0;
 	}
 
+	@observable
+	private _activeScene: Scene | null = null;
+
 	public readonly iterateScenes = <R>(iterator: (sceneInfo: SceneData, index: number) => R): R[] =>
 	{
 		const scenes = this.get("scenes");
@@ -50,10 +49,9 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 		};
 	}
 
-	protected override init(props: ProjectData | {})
+	protected override init()
 	{
-		if (notEmpty<SceneData>(props))
-			this.update({ name: props.name, scenes: {} });
+
 	}
 
 	public readonly createScene = (name: string) =>
@@ -62,23 +60,31 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 		const keys = Object.keys(scenes);
 		if (keys.includes(name))
 			return false;
-		this.set("scenes", { ...scenes, name: `${keys.length}.json` });
+		const o = { ...scenes, [name]: `${keys.length + 1}.json` };
+		this.set("scenes", o);
 		return true;
 	}
 
+	@action
 	public readonly loadScene = (name: string) =>
 	{
-
+		const scenePath = this.data.scenes[name];
+		if (scenePath)
+		{
+			this._activeScene = makeObservable(new Scene(this.rootStore, path.resolve(this.dir, "scenes", scenePath), {}));
+			return true;
+		}
+		return false;
 	}
-	
+
 	public readonly renameScene = (name: string, newName: string) =>
 	{
-		
+
 	}
 
 	public readonly removeScene = (name: string) =>
 	{
-		
+
 	}
 }
 
@@ -96,11 +102,6 @@ type ProjectData = {
 
 export class ProjectManagerStore extends PersistentStore<ProjectListData, ProjectStoreProps | {}>
 {
-	public get name(): string
-	{
-		return "projects";
-	}
-
 	@observable
 	private _loadedProject: Project | null = null;
 
@@ -114,7 +115,7 @@ export class ProjectManagerStore extends PersistentStore<ProjectListData, Projec
 
 	protected override init(props: ProjectStoreProps | {}): void
 	{
-		if(notEmpty<ProjectStoreProps>(props))
+		if (notEmpty<ProjectStoreProps>(props))
 		{
 			const dir = props.projectDir;
 		}
@@ -130,6 +131,8 @@ export class ProjectManagerStore extends PersistentStore<ProjectListData, Projec
 
 	private readonly findProjectIndex = (dir: string) => this.data.projects.findIndex(p => p.dir === dir);
 
+	private readonly findProject = (dir: string) => this.data.projects.find(p => p.dir === dir);
+
 	@action
 	public readonly create = (name: string, dir: string) =>
 	{
@@ -137,9 +140,15 @@ export class ProjectManagerStore extends PersistentStore<ProjectListData, Projec
 	}
 
 	@action
-	public readonly load = (dir: string) =>
+	public readonly load = (dir: string): boolean =>
 	{
-
+		const p = this.findProject(dir);
+		if (p)
+		{
+			this._loadedProject = makeObservable(new Project(this.rootStore, path.resolve(dir, "project.json"), { name: p.name, scenes: {} }));
+			return true;
+		}
+		return false;
 	}
 
 	@action

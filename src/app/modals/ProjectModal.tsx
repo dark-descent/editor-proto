@@ -146,9 +146,11 @@ const OpenModal = withStore(ProjectManagerStore, ({ store }) =>
 	{
 		if (editTarget === -1)
 		{
-			store.load(dir);
-			modal.close();
-			openSceneModal.open();
+			if(store.load(dir))
+			{
+				modal.close();
+				openSceneModal.open();
+			}
 		}
 	}
 
@@ -241,4 +243,4 @@ export const openProjectModal = Modal.create({
 	Component: OpenModal,
 	title: "Projects",
 	canClose: () => !!RootStore.get(ProjectManagerStore).current,
-}, !RootStore.get(ProjectManagerStore).current);
+});
