@@ -49,10 +49,10 @@ app.whenReady().then(() =>
 
 	browserWindow.on("ready-to-show", () => 
 	{
+		console.log("READY :D");
 		browserWindow.maximize();
 		browserWindow.show();
 		browserWindow.webContents.openDevTools();
-		console.log("READY :D");
 	});
 });
 

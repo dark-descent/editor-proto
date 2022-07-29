@@ -6,8 +6,6 @@ import { testLayout } from "./config/PanelLayoutConfig";
 import { AppMenuStore, PanelManager } from "./stores";
 import { RootStore } from "./stores/RootStore";
 
-import { Engine } from "@engine";
-import { AppStore } from "./stores/AppStore";
 import { ProjectManagerStore } from "./stores/ProjectStore";
 import { openProjectModal } from "./modals/ProjectModal";
 

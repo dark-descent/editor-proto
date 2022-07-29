@@ -1,12 +1,18 @@
-import { Panel, withStores } from "app/stores";
+import { Panel, withStore } from "app/stores";
+import { WorkspaceStore } from "app/stores/WorkspaceStore";
 import { FlexBox, FlexItem } from "app/views";
 import React from "react";
 
 import "./styles/edit-panel.scss";
 
-const EditPanelComponent = withStores({  }, ({  }) => 
+const EditPanelComponent = withStore(WorkspaceStore, ({ store }) => 
 {
-	const ref = React.useRef<HTMLCanvasElement>();
+	// const ref = React.useRef<HTMLCanvasElement | null>();
+
+	const onRef = (canvas: HTMLCanvasElement | null) =>
+	{
+		store.resetCanvas(canvas);
+	}
 
 	return (
 		<FlexBox className="edit-panel" absolute fill vertical>
@@ -14,7 +20,7 @@ const EditPanelComponent = withStores({  }, ({  }) =>
 				
 			</FlexItem>
 			<FlexItem>
-				<canvas ref={ref as any} />
+				<canvas ref={onRef} />
 			</FlexItem>
 		</FlexBox>
 	);

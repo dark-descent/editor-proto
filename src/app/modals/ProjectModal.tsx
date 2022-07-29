@@ -8,6 +8,7 @@ import { observer } from "mobx-react";
 import React from "react";
 import { getClassFromProps, useRefState } from "utils/react";
 import { useModal } from "../components";
+import { confirm } from "./ConfirmModal";
 import { openSceneModal } from "./SceneModal";
 
 import "./styles/open-project-modal.scss";
@@ -148,7 +149,7 @@ const OpenModal = withStore(ProjectManagerStore, ({ store }) =>
 		{
 			store.load(dir).then((loaded) => 
 			{
-				if(loaded)
+				if (loaded)
 				{
 					modal.close();
 					openSceneModal.open();
@@ -181,8 +182,15 @@ const OpenModal = withStore(ProjectManagerStore, ({ store }) =>
 
 	const onDeleteClicked = (dir: string) => () =>
 	{
-		store.remove(dir);
-		setEditTarget(-1);
+		confirm("Are you sure you want to delete ${dir}?").then((confirmed) => 
+		{
+			console.log(confirmed);
+			if (confirmed)
+			{
+				store.remove(dir);
+				setEditTarget(-1);
+			}
+		});
 	}
 
 	const onOverlayClicked = () =>
@@ -227,10 +235,12 @@ const OpenModal = withStore(ProjectManagerStore, ({ store }) =>
 											</View>
 										)
 									}
-									{store.loadingProject === p.name && <View absolute>
-										Loading
-										{/* <img src="" /> */}
-									</View>}
+									{store.loadingProject === p.name && (
+										<View absolute className="loader">
+											{/* Loading... */}
+											{/* <img src="" /> */}
+										</View>
+									)}
 								</View>
 							);
 						})}

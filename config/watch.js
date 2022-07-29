@@ -48,7 +48,6 @@ const watchEditor = (cb = () => { }) =>
 		const addonBuildPath = resolve("engine", "build", "Debug", "addon.node");
 		watch(resolve("engine"), { recursive: true }, (e, name) => 
 		{
-			console.log("\n\nCHANGED\n\n!!");
 			if (name && name.startsWith("build\\Debug\\addon.lib"))
 			{
 				copyTimeout && clearTimeout(copyTimeout);

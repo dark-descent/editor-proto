@@ -3,7 +3,7 @@ import path from "path";
 import { PersistentStore } from "./PersistentStore";
 import { RootStore } from "./RootStore";
 import fs from "fs";
-import { Engine, EngineConfig } from "../../../engine/src/Engine";
+import { Engine, EngineConfig } from "@engine";
 
 const notEmpty = <T>(obj: any): obj is T => (typeof obj === "object" && Object.keys(obj).length !== 0);
 
@@ -59,6 +59,7 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 	{
 		if (!this._engine)
 			this._engine = await Engine.initialize(config);
+		console.log(this._engine)
 	}
 
 	private readonly createScenePath = (scenePath: string) => path.resolve(this.dir, "scenes", scenePath);
