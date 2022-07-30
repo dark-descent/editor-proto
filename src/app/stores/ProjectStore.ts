@@ -189,7 +189,7 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 		const scenePath = this.data.scenes[name];
 		if (scenePath)
 		{
-			this._activeScene = makeObservable(new SceneStore(this.rootStore, this.createScenePath(scenePath), {}, this.engine));
+			this._activeScene = makeObservable(new SceneStore(this.rootStore, this.createScenePath(scenePath), {}, this.engine, name));
 			return true;
 		}
 		return false;

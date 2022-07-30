@@ -5,6 +5,14 @@
 			"path": "."
 		},
 		{
+			"name": "editor",
+			"path": "./src"
+		},
+		{
+			"name": "engine",
+			"path": "./engine/src"
+		},
+		{
 			"name": "engine-addon",
 			"path": "./engine/src/addon"
 		},
@@ -18,10 +26,13 @@
 			"**/CVS": true,
 			"**/.DS_Store": true,
 			"**/Thumbs.db": true,
-			// "**/dist/**": true,
+			"dist/**": true,
 			"**/node_modules/**": true,
 			"**/package-lock.json": true,
-			// "config/**": true,
+			"config/**": true,
+			"engine/config/**": true,
+			"engine/build/**": true,
+			"engine/binding.gyp": true,
 			"**/.vscode/**": true
 		},
 		"files.associations": {
