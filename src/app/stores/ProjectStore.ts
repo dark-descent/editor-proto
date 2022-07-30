@@ -109,7 +109,7 @@ class SceneStore extends PersistentStore<{}>
 	{
 		super(root, path, initData);
 		this.engine = engine;
-		this.scene = new Scene(name, engine);
+		this.scene = new Scene(name, engine, -1, true);
 	}
 
 	@action
@@ -179,6 +179,7 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 			return false;
 		const o = { ...scenes, [name]: `${keys.length + 1}.json` };
 		this.set("scenes", o);
+		this.loadScene(name);
 		return true;
 	}
 
