@@ -6,12 +6,12 @@ const CopyPlugin = require("copy-webpack-plugin");
 const baseConfig = require("./webpack.base");
 const { platform } = require("os");
 
-const rendererConfig = (dev = false) =>
+const rendererConfig = (name = "renderer", dev = false) =>
 {
 	const base = baseConfig(dev);
 	return {
 		...base,
-		name: "editor-renderer",
+		name,
 		target: "electron-renderer",
 		entry: resolve(app, "index.ts"),
 		output: {

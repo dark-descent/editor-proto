@@ -3,25 +3,59 @@ const os = require("os");
 const find = require("find-process");
 const paths = require("./paths");
 
-module.exports = (index, proc) =>
+let proc;
+
+const start = (index = paths.distEntry) =>
+{
+	if (!proc)
+	{
+		console.log("Starting electron...");
+		proc = spawn(`electron${os.platform() === "win32" ? ".cmd" : ""}`, [index], { stdio: "inherit" });
+		proc.on("close", () => proc = null);
+	}
+}
+
+const kill = () => new Promise(async (res, rej) => 
 {
 	if (proc)
-		proc.kill();
-
-	find("name", "electron").then((list) =>
 	{
+		console.log("Killing electron instance...");
+		proc.on("close", () => 
+		{
+			setTimeout(() => 
+			{
+				res();
+			}, 250);
+		});
+		const list = await find("name", "electron");
 		list.forEach((item) => 
 		{
 			if (item.bin.includes(paths.root))
 				process.kill(item.pid);
 		});
+		try
+		{
+			proc.kill();
+		}
+		catch (e)
+		{
+			rej(e);
+		}
+	}
+	else
+	{
+		res();
+	}
+})
 
-		proc = spawn(`electron${os.platform() === "win32" ? ".cmd" : ""}`, [index], { stdio: "inherit" });
-	}, (err) => console.log(err.stack || err));
-}
-
-if (require.main === module)
+const run = async (index = paths.distEntry) => 
 {
-	const [, , index] = process.argv;
-	module.exports(index);
-}
+	await kill();
+	start(index, true);
+};
+
+module.exports = {
+	run,
+	start,
+	kill
+};

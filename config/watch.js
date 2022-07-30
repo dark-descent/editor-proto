@@ -1,111 +1,49 @@
-const { fork } = require("child_process");
-const find = require("find-process");
-const { copyFileSync, watch, existsSync } = require("fs");
-const { platform } = require("os");
-const { webpack } = require("webpack");
-const { engine, resolve, root } = require("./paths");
-const run = require("./run");
-const mainConfig = require("./webpack.main");
-const rendererConfig = require("./webpack.renderer");
+const mainConfig = require("./webpack.main")("main", true);
+const rendererConfig = require("./webpack.renderer")("renderer", true);
 
-const isWin = platform() === "win32";
+const watchWebpack = require("./watch-webpack");
+const watchAddon = require("../engine/config/watch");
+const { kill, run, start } = require("./run-electron");
 
-const watchEditor = (cb = () => { }) => 
+const { copyFileSync } = require("fs");
+const { resolve } = require("./paths");
+
+let didAddonCompile = false;
+let didMainCompile = false;
+let didRendererCompile = false;
+
+const onWebpackCompiled = (err, name) =>
 {
-	let editorProc;
-
-	const startEditor = async () =>
+	if (!err)
 	{
-		await killEditor();
-		editorProc = run("./dist/main.js", editorProc);
-		editorProc.on("exit", () => { editorProc = null; });
-	}
-
-	const killEditor = () => find("name", "electron").then((list) =>
-	{
-		if (editorProc)
-			editorProc.kill();
-		editorProc = null;
-		list.forEach((item) => 
+		if (name === "main")
 		{
-			if (item.bin.includes(root))
-			{
-				try
-				{
-					process.kill(item.pid);
-				}
-				catch { }
-			}
-		});
-	}, (err) => console.log(err.stack || err));
-
-	fork("config/watch.js", [".."], { cwd: engine, stdio: "inherit" });
-
-	let copyTimeout = null;
-
-	if (isWin)
-	{
-		const addonBuildPath = resolve("engine", "build", "Debug", "addon.node");
-		watch(resolve("engine"), { recursive: true }, (e, name) => 
-		{
-			if (name && name.startsWith("build\\Debug\\addon.lib"))
-			{
-				copyTimeout && clearTimeout(copyTimeout);
-
-				copyTimeout = setTimeout(async () => 
-				{
-					console.log(addonBuildPath);
-					if (existsSync(addonBuildPath))
-					{
-						try
-						{
-							await killEditor();
-						}
-						catch { }
-
-						copyFileSync(addonBuildPath, resolve("public", "addon.node"));
-					}
-				}, 500);
-			}
-		});
-	}
-
-	webpack(mainConfig(true)).watch({ ignored: ["src/editor/app/*", "engine/*"] }, (err, stats) => 
-	{
-		if (err)
-		{
-			console.error(err);
+			if (didRendererCompile)
+				run();
+			didMainCompile = true;
 		}
 		else
 		{
-			console.log(stats.toString("minimal"));
-			startEditor();
+			if(didMainCompile)
+				start();
+			didRendererCompile = true;
 		}
-		cb(err, stats);
-	});
-
-	let didRendererBuild = false;
-
-	webpack(rendererConfig(true)).watch({ ignored: ["engine/src/addon/*"] }, (err, stats) => 
-	{
-		if (err)
-		{
-			console.error(err);
-		}
-		else
-		{
-			console.log(stats.toString("minimal"));
-			
-			if(didRendererBuild === false && editorProc === null)
-				startEditor();
-			
-			didRendererBuild = true;
-		}
-		cb(err, stats);
-	});
+	}
 }
 
-if (require.main === module)
-	watchEditor();
-else
-	module.exports = watchEditor;
+watchAddon(async (hasError, buildPath) => 
+{
+	if (!didAddonCompile)
+	{
+		didAddonCompile = true;
+		watchWebpack(mainConfig, onWebpackCompiled);
+		watchWebpack(rendererConfig, onWebpackCompiled);
+		copyFileSync(buildPath, resolve("public", "addon.node"));
+	}
+	else if (!hasError)
+	{
+		await kill();
+		copyFileSync(buildPath, resolve("public", "addon.node"));
+		start();
+	}
+});
