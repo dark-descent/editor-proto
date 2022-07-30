@@ -3,20 +3,124 @@ import path from "path";
 import { PersistentStore } from "./PersistentStore";
 import { RootStore } from "./RootStore";
 import fs from "fs";
-import { Engine, EngineConfig } from "@engine";
+import { Component, Engine, EngineConfig, Entity, Transform } from "@engine";
+import { ComponentType } from "react";
+import { Scene } from "../../../engine/src/Scene";
+import { mobx } from "utils";
 
 const notEmpty = <T>(obj: any): obj is T => (typeof obj === "object" && Object.keys(obj).length !== 0);
 
-class Scene extends PersistentStore<{}>
+export class ComponentStore<T extends Component>
 {
+	public readonly component: T;
+	public readonly entity: EntityStore;
+
+	public constructor(entity: EntityStore, component: T)
+	{
+		this.entity = entity;
+		this.component = component;
+	}
+}
+
+export class TransformStore extends ComponentStore<Transform>
+{
+	@observable
+	private _children: TransformStore[];
+
+	@computed
+	public get children(): ReadonlyArray<TransformStore> { return this._children; }
+
+	public constructor(entity: EntityStore, transform: Transform, children: TransformStore[] = [])
+	{
+		super(entity,transform);
+		this._children = children;
+	}
+}
+
+export class EntityStore
+{
+	private componentTypes: ComponentType<any>[] = [];
+	private entity: Entity;
+
+	@observable
+	private _name: string;
+
+	@computed
+	public get name() { return this._name; }
+
+	@observable
+	private _components: ComponentStore<any>[];
+
+	public readonly sceneStore: SceneStore;
+	public readonly transform: TransformStore;
+	
+	public constructor(sceneStore: SceneStore, name: string = "Entity", entity: Entity = new Entity(name, sceneStore.scene))
+	{
+		this._name = name;
+		this.sceneStore = sceneStore;
+		this.entity = entity;
+		
+		this._components = [makeObservable(new TransformStore(this, new Transform(this.entity)))]
+		this.transform = this._components[0]! as TransformStore;
+	}
+
+	public addComponent<T extends Component>(type: ComponentType<T>): ComponentStore<T>
+	{
+		const i = this.componentTypes.indexOf(type);
+		if(i === -1)
+		{
+			const store = makeObservable(new ComponentStore<T>(this, this.entity.addComponent(type)));
+			this.componentTypes.push(type);
+			this._components.push(store);
+			return store;
+		}
+		return this._components[i] as ComponentStore<T>;
+	}
+
+	public getComponent<T extends Component>(type: ComponentType<T>): ComponentStore<T> | null
+	{
+		const i = this.componentTypes.indexOf(type);
+		if(i === -1)
+			return null;
+		return this._components[i] as ComponentStore<T>;
+	}
+}
+
+class SceneStore extends PersistentStore<{}>
+{
+	public readonly engine: Engine;
+
+	private readonly _entities: EntityStore[] = [];
+
+	@observable
+	private _rootTransforms: TransformStore[] = [];
+
+	@computed
+	public get rootTransforms() { return this._rootTransforms; }
+
+	public readonly scene: Scene;
+
 	protected initData()
 	{
 		return {};
 	}
 
-	protected override init()
+	public constructor(root: RootStore, path: string, initData: {}, engine: Engine, name?: string)
 	{
+		super(root, path, initData);
+		this.engine = engine;
+		this.scene = new Scene(name, engine);
+	}
 
+	@action
+	public readonly addEntity = (name?: string) =>
+	{
+		console.log("add entity");
+		const entity = makeObservable(new EntityStore(this, name));
+		
+		console.log("entity created");
+		this._entities.push(entity);
+		this._rootTransforms = [...this._rootTransforms, entity.transform];
 	}
 }
 
@@ -35,7 +139,10 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 	}
 
 	@observable
-	private _activeScene: Scene | null = null;
+	private _activeScene: SceneStore | null = null;
+
+	@computed
+	public get activeScene() { return this._activeScene; }
 
 	private _engine: Engine | null = null;
 
@@ -59,13 +166,13 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 	{
 		if (!this._engine)
 			this._engine = await Engine.initialize(config);
-		console.log(this._engine)
 	}
 
 	private readonly createScenePath = (scenePath: string) => path.resolve(this.dir, "scenes", scenePath);
 
 	public readonly createScene = (name: string) =>
 	{
+		console.log(`create scene ${name}...`);
 		const scenes = this.get("scenes");
 		const keys = Object.keys(scenes);
 		if (keys.includes(name))
@@ -78,10 +185,11 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 	@action
 	public readonly loadScene = (name: string) =>
 	{
+		console.log(`Load scene ${name}`);
 		const scenePath = this.data.scenes[name];
 		if (scenePath)
 		{
-			this._activeScene = makeObservable(new Scene(this.rootStore, this.createScenePath(scenePath), {}));
+			this._activeScene = makeObservable(new SceneStore(this.rootStore, this.createScenePath(scenePath), {}, this.engine));
 			return true;
 		}
 		return false;

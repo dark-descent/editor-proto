@@ -7,6 +7,7 @@ export * as math from "./math";
 export * as path from "./path";
 export * from "./TypeMap"
 export * as array from "./array";
+export * from "./mobx";
 
 export const wait = (time: number, target: "ms" | "s" | "min" = "ms") => new Promise<NodeJS.Timeout>((resolve) => 
 {

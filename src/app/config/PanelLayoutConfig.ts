@@ -1,4 +1,4 @@
-import { EditPanel, ConsolePanel } from "app/panels";
+import { EditPanel, ConsolePanel, SceneHierarchyPanel } from "app/panels";
 import React from "react";
 import { Panel, PanelManager } from "../stores";
 
@@ -9,17 +9,18 @@ const TestPanelC = Panel.create("Test", () => React.createElement("h1", {}, "Tes
 const TestPanelD = Panel.create("Test", () => React.createElement("h1", {}, "Test D"));
 
 const panels = PanelManager.createPanelMap({
-	test: TestPanel,
+	sceneHierarchy: SceneHierarchyPanel,
 	a: TestPanelA,
 	b: TestPanelB,
 	c: TestPanelC,
 	d: TestPanelD,
 	editor: EditPanel,
-	console: ConsolePanel
+	console: ConsolePanel,
+
 });
 
 export const testLayout = PanelManager.createConfig(panels, "horizontal", [
-	"test",
+	"sceneHierarchy",
 	{
 		child: {
 			dir: "vertical",

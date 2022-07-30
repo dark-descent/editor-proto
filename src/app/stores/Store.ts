@@ -20,8 +20,7 @@ export class Store<P extends {} = {}>
 			const error = e as Error;
 			const err = "[MobX] No annotations were passed to makeObservable, but no decorated members have been found either";
 			if (error.message === err)
-				error.message += `!\r\nTried to decorate "${(store as any).constructor.name}"!`;
-			console.warn(error);
+				console.log(`No decorated members found at "${(store as any).constructor.name}"!`);
 			return store;
 		}
 	}

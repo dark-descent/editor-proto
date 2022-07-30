@@ -84,6 +84,8 @@ const watchEditor = (cb = () => { }) =>
 		cb(err, stats);
 	});
 
+	let didRendererBuild = false;
+
 	webpack(rendererConfig(true)).watch({ ignored: ["engine/src/addon/*"] }, (err, stats) => 
 	{
 		if (err)
@@ -93,6 +95,11 @@ const watchEditor = (cb = () => { }) =>
 		else
 		{
 			console.log(stats.toString("minimal"));
+			
+			if(didRendererBuild === false && editorProc === null)
+				startEditor();
+			
+			didRendererBuild = true;
 		}
 		cb(err, stats);
 	});
