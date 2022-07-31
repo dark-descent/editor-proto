@@ -3,7 +3,10 @@
         {
             "name": "Win32",
 			"browse": {
-				"path": []
+				"path": [
+					"${workspaceFolder}",
+					"~/AppData"
+				]
 			},
             "includePath": [
                 "${workspaceFolder}/engine/src/addon/include/**",
@@ -20,6 +23,7 @@
             "cppStandard": "c++23",
             "intelliSenseMode": "windows-msvc-x64"
         }
+		
     ],
     "version": 4
 }

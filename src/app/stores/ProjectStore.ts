@@ -3,126 +3,10 @@ import path from "path";
 import { PersistentStore } from "./PersistentStore";
 import { RootStore } from "./RootStore";
 import fs from "fs";
-import { Component, Engine, EngineConfig, Entity, Transform } from "@engine";
-import { ComponentType } from "react";
-import { Scene } from "../../../engine/src/Scene";
-import { mobx } from "utils";
+import { Engine, EngineConfig } from "@engine";
+import { SceneStore } from "./engine/SceneStore";
 
 const notEmpty = <T>(obj: any): obj is T => (typeof obj === "object" && Object.keys(obj).length !== 0);
-
-export class ComponentStore<T extends Component>
-{
-	public readonly component: T;
-	public readonly entity: EntityStore;
-
-	public constructor(entity: EntityStore, component: T)
-	{
-		this.entity = entity;
-		this.component = component;
-	}
-}
-
-export class TransformStore extends ComponentStore<Transform>
-{
-	@observable
-	private _children: TransformStore[];
-
-	@computed
-	public get children(): ReadonlyArray<TransformStore> { return this._children; }
-
-	public constructor(entity: EntityStore, transform: Transform, children: TransformStore[] = [])
-	{
-		super(entity,transform);
-		this._children = children;
-	}
-}
-
-export class EntityStore
-{
-	private componentTypes: ComponentType<any>[] = [];
-	private entity: Entity;
-
-	@observable
-	private _name: string;
-
-	@computed
-	public get name() { return this._name; }
-
-	@observable
-	private _components: ComponentStore<any>[];
-
-	public readonly sceneStore: SceneStore;
-	public readonly transform: TransformStore;
-	
-	public constructor(sceneStore: SceneStore, name: string = "Entity", entity: Entity = new Entity(name, sceneStore.scene))
-	{
-		this._name = name;
-		this.sceneStore = sceneStore;
-		this.entity = entity;
-		
-		this._components = [makeObservable(new TransformStore(this, new Transform(this.entity)))]
-		this.transform = this._components[0]! as TransformStore;
-	}
-
-	public addComponent<T extends Component>(type: ComponentType<T>): ComponentStore<T>
-	{
-		const i = this.componentTypes.indexOf(type);
-		if(i === -1)
-		{
-			const store = makeObservable(new ComponentStore<T>(this, this.entity.addComponent(type)));
-			this.componentTypes.push(type);
-			this._components.push(store);
-			return store;
-		}
-		return this._components[i] as ComponentStore<T>;
-	}
-
-	public getComponent<T extends Component>(type: ComponentType<T>): ComponentStore<T> | null
-	{
-		const i = this.componentTypes.indexOf(type);
-		if(i === -1)
-			return null;
-		return this._components[i] as ComponentStore<T>;
-	}
-}
-
-class SceneStore extends PersistentStore<{}>
-{
-	public readonly engine: Engine;
-
-	private readonly _entities: EntityStore[] = [];
-
-	@observable
-	private _rootTransforms: TransformStore[] = [];
-
-	@computed
-	public get rootTransforms() { return this._rootTransforms; }
-
-	public readonly scene: Scene;
-
-	protected initData()
-	{
-		return {};
-	}
-
-	public constructor(root: RootStore, path: string, initData: {}, engine: Engine, name?: string)
-	{
-		super(root, path, initData);
-		this.engine = engine;
-		this.scene = new Scene(name, engine, -1, true);
-	}
-
-	@action
-	public readonly addEntity = (name?: string) =>
-	{
-		console.log("add entity");
-		const entity = makeObservable(new EntityStore(this, name));
-		
-		console.log("entity created");
-		this._entities.push(entity);
-		this._rootTransforms = [...this._rootTransforms, entity.transform];
-	}
-}
 
 class Project extends PersistentStore<ProjectData, ProjectData | {}>
 {
@@ -187,6 +71,10 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 	public readonly loadScene = (name: string) =>
 	{
 		console.log(`Load scene ${name}`);
+
+		if (this.activeScene?.scene.name === name)
+			return true;
+
 		const scenePath = this.data.scenes[name];
 		if (scenePath)
 		{

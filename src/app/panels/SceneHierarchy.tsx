@@ -1,10 +1,12 @@
 import { Panel, withStore } from "app/stores";
-import { ProjectManagerStore, TransformStore } from "app/stores/ProjectStore";
+import { ProjectManagerStore } from "app/stores/ProjectStore";
 import { Button, View } from "app/views";
 import { observer } from "mobx-react";
 import React from "react";
+import { Transform } from "@engine";
 
 import "./styles/edit-panel.scss";
+import { TransformStore } from "app/stores/engine/components/TransformStore";
 
 const TransformItem = observer(({ transform }: { transform: TransformStore }) =>
 {
@@ -12,7 +14,7 @@ const TransformItem = observer(({ transform }: { transform: TransformStore }) =>
 		<View className="item">
 			{transform.entity.name}
 			<View className="children">
-				{transform.children.map((transform, i) => <TransformItem key={i} transform={transform} />)}
+				{/* {transform.children.map((transform, i) => <TransformItem key={i} transform={transform} />)} */}
 			</View>
 		</View>
 	);

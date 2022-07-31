@@ -33,7 +33,7 @@
 			"engine/config/**": true,
 			"engine/build/**": true,
 			"engine/binding.gyp": true,
-			"**/.vscode/**": true
+			// "**/.vscode/**": true
 		},
 		"files.associations": {
 			"bochsrc": "plaintext",
