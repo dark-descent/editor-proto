@@ -4,7 +4,8 @@ import { PersistentStore } from "./PersistentStore";
 import { RootStore } from "./RootStore";
 import fs from "fs";
 import { Engine, EngineConfig } from "@engine";
-import { SceneStore } from "./engine/SceneStore";
+
+type SceneStore = any;
 
 const notEmpty = <T>(obj: any): obj is T => (typeof obj === "object" && Object.keys(obj).length !== 0);
 
@@ -76,9 +77,10 @@ class Project extends PersistentStore<ProjectData, ProjectData | {}>
 			return true;
 
 		const scenePath = this.data.scenes[name];
+		
 		if (scenePath)
 		{
-			this._activeScene = makeObservable(new SceneStore(this.rootStore, this.createScenePath(scenePath), {}, this.engine, name));
+			// this._activeScene = makeObservable(new SceneStore(this.rootStore, this.createScenePath(scenePath), {}, this.engine, name));
 			return true;
 		}
 		return false;

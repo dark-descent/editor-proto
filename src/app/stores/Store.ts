@@ -5,8 +5,7 @@ export class Store<P extends {} = {}>
 {
 	public static readonly create = <T extends Store<any>>(storeType: StoreType<T>, ...params: ConstructorParameters<StoreType<T>>): T => 
 	{
-		const store = new storeType(...params) as any;
-		return store;
+		return makeObservable(new storeType(...params) as any);
 	}
 
 	public static readonly makeObservable = <T>(store: T): T =>
