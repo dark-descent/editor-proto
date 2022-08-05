@@ -1,56 +1,49 @@
-const { exec } = require("child_process");
-const { webpack } = require("webpack");
-const { engine } = require("./paths");
-const run = require("./run");
-const mainConfig = require("./webpack.main");
-const rendererConfig = require("./webpack.renderer");
+const mainConfig = require("./webpack.main")("main", true);
+const rendererConfig = require("./webpack.renderer")("renderer", true);
 
-let proc;
+const watchWebpack = require("./watch-webpack");
+const watchAddon = require("../engine/config/watch");
+const { kill, run, start } = require("./run-electron");
 
-const watchEditor = (cb = () => { }) => 
+const { copyFileSync } = require("fs");
+const { resolve } = require("./paths");
+
+let didAddonCompile = false;
+let didMainCompile = false;
+let didRendererCompile = false;
+
+const onWebpackCompiled = (err, name) =>
 {
-	const addonProc = exec("npm run watch ..", { cwd: engine });
-
-	addonProc.stdout.pipe(process.stdout);
-	addonProc.stdin.pipe(process.stdin);
-	addonProc.stderr.pipe(process.stderr);
-
-	webpack(mainConfig(true)).watch({ ignored: ["src/editor/app/*", "engine/*"] }, (err, stats) => 
+	if (!err)
 	{
-		if (err)
+		if (name === "main")
 		{
-			console.error(err);
+			if (didRendererCompile)
+				run();
+			didMainCompile = true;
 		}
 		else
 		{
-			console.log(stats.toString("minimal"));
-			proc = run("./dist/main.js", proc);
-			proc.on("exit", () => { console.log("exit"); proc = null; });
+			if(didMainCompile)
+				start();
+			didRendererCompile = true;
 		}
-		cb(err, stats);
-	});
-
-	webpack(rendererConfig(true)).watch({ ignored: ["engine/src/addon/*"] }, (err, stats) => 
-	{
-		if (err)
-		{
-			console.error(err);
-		}
-		else
-		{
-			console.log(stats.toString("minimal"));
-			
-			if (proc === null)
-			{
-				proc = run("./dist/main.js", proc);
-				proc.on("exit", () => proc = null);
-			}
-		}
-		cb(err, stats);
-	});
+	}
 }
 
-if (require.main === module)
-	watchEditor();
-else
-	module.exports = watchEditor;
+watchAddon(async (hasError, buildPath) => 
+{
+	if (!didAddonCompile)
+	{
+		didAddonCompile = true;
+		watchWebpack(mainConfig, onWebpackCompiled);
+		watchWebpack(rendererConfig, onWebpackCompiled);
+		copyFileSync(buildPath, resolve("public", "addon.node"));
+	}
+	else if (!hasError)
+	{
+		await kill();
+		copyFileSync(buildPath, resolve("public", "addon.node"));
+		start();
+	}
+});

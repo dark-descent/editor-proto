@@ -4,7 +4,7 @@ import { View, ViewTheme } from "./View";
 export const Icon: React.FC<IconProps> = ({ type = "solid", name, ...rest }) =>
 {
 	return (
-		<View type="i" className={`fa${type[0]} fa-${name}`} {...rest}/>
+		<View elType="i" className={`fa${type[0]} fa-${name}`} {...rest}/>
 	);
 }
 

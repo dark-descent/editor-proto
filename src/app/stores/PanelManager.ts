@@ -554,7 +554,7 @@ export class PanelManager extends Store<PanelBoxProps>
 	@observable
 	private _slidingProps: SlidingProps | null = null;
 
-	protected override init({ children = [], dir = "horizontal", panels = {} }: Partial<InitPanelManagerProps<any, any>>): void 
+	protected override init({ children = [], dir = "horizontal", panels = {} }: InitPanelManagerProps<any, any>): void 
 	{
 		Object.keys(panels).forEach(key => this.panels[key] = panels[key]!);
 		const box = new PanelBox(dir, null);

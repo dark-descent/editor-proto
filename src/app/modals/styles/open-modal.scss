@@ -1,0 +1,119 @@
+.no-scenes {
+	h1 {
+		padding: 15px 0px;
+	}
+	.btn-wrapper {
+		padding: 15px 0px;
+	}
+}
+
+.open-modal {
+	.btn-create-new {
+		margin-top: 15px;
+		margin-bottom: 15px;
+	}
+	.projects-list {
+		.scene {
+			padding: 12px;
+			cursor: pointer;
+			transition: 120ms;
+			&:not(:last-child) {
+				border-bottom: 1px solid var(--sec-background);
+			}
+			&:hover,
+			&.active {
+				background-color: var(--transparent-light);
+			}
+
+			.edit-btn {
+				right: 8px;
+				top: 8px;
+				left: unset;
+				width: 26px;
+				height: 26px;
+				border: 1px solid var(--sec-background);
+				border-radius: 4px;
+				overflow: hidden;
+				cursor: pointer;
+				background-color: transparent;
+				transition: var(--btn-transition);
+				opacity: 0.75;
+				&:hover {
+					background-color: var(--transparent-light);
+					opacity: 1 !important;
+				}
+				.inner-btn {
+					background-color: var(--tert-background);
+					position: absolute;
+					left: 50%;
+					top: 50%;
+					transform: translate(-50%, -50%);
+					width: 4px;
+					height: 4px;
+					border-radius: 4px;
+					transition: var(--btn-transition);
+				}
+				.inner-btn::before,
+				.inner-btn::after {
+					content: "";
+					position: absolute;
+					background-color: var(--tert-background);
+					left: 50%;
+					width: 4px;
+					height: 4px;
+					transform: translate(-50%, -50%);
+					border-radius: 4px;
+				}
+				.inner-btn::before {
+					top: -100%;
+				}
+				.inner-btn::after {
+					top: 200%;
+				}
+			}
+
+			.edit-panel {
+				right: 0;
+				left: unset;
+				width: 200px;
+				background-color: black;
+				top: 100%;
+				z-index: 999;
+				& > .view {
+					padding: 12px;
+				}
+			}
+		}
+	}
+}
+
+#create-scene-modal,
+#rename-scene-modal {
+	input {
+		display: inline-block;
+		margin: 25px 0px;
+		background-color: transparent;
+		border: 0px;
+		border-bottom: 1px solid var(--tert-background);
+		padding: 5px 15px;
+		outline: none;
+		color: white;
+		&:focus {
+			border-bottom: 1px solid var(--accent);
+		}
+	}
+	.btn-wrapper {
+		top: unset;
+		bottom: 10px;
+	}
+	.btn-rename,
+	.btn-create {
+		float: right;
+	}
+}
+
+// #rename-scene-modal {
+// }
+
+// #delete-scene-modal {
+// }

@@ -1,8 +1,0 @@
-{
-	"name": "Test Project",
-	"assets": {
-		"scenes": {
-			"Test Scene": "./scenes/test.scene.json"
-		}
-	}
-}

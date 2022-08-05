@@ -67,3 +67,18 @@ export const filterType = <T extends React.ComponentClass>(children: React.React
 {
 	return filter(children, (c: any) => c.type === type);
 }
+
+export const useRefState = <T>(val: T): [T, (val: T) => void, React.MutableRefObject<T>] =>
+{
+	const [state, setState] = React.useState(val);
+	const ref = React.useRef(val);
+	return [
+		state,
+		(val: T) =>
+		{
+			ref.current = val;
+			setState(val);
+		},
+		ref
+	];
+}

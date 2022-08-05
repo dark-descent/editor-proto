@@ -18,7 +18,13 @@ export class RootStore
 	public get isInitialized() { return this._isInitialized; };
 	public get isMounted() { return this._isMounted; };
 
-	private readonly getInitStoreProp = (type: StoreType<any>): any => this._initProps.get(type) || {};
+	private readonly getInitStoreProp = (type: StoreType<any>): any => 
+	{
+		const props = this._initProps.get(type);
+		if(!props && (type as any).__REQUIRED_PROPS__)
+			throw new Error(`Store ${type.name} is not initialized!`);
+		return props;
+	};
 
 	private constructor() { }
 
@@ -27,7 +33,7 @@ export class RootStore
 		let store = this.stores.get(storeType);
 		if (!store)
 		{
-			store = Store.create<T, StoreType<T>>(storeType, this);
+			store = Store.create<T>(storeType, this);
 			if (this.isInitialized)
 			{
 				store["init"](this.getInitStoreProp(storeType));

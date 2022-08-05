@@ -6,18 +6,17 @@ const CopyPlugin = require("copy-webpack-plugin");
 const baseConfig = require("./webpack.base");
 const { platform } = require("os");
 
-const rendererConfig = (dev = false) =>
+const rendererConfig = (name = "renderer", dev = false) =>
 {
 	const base = baseConfig(dev);
 	return {
 		...base,
-		name: "editor-renderer",
+		name,
 		target: "electron-renderer",
 		entry: resolve(app, "index.ts"),
 		output: {
 			filename: `js/[name].js`,
 			chunkFilename: 'js/[id].js',
-			clean: true,
 			path: resolve(dist, "app"),
 		},
 		plugins: [
@@ -38,10 +37,6 @@ const rendererConfig = (dev = false) =>
 						globOptions: {
 							ignore: ["**/index.html"],
 						},
-					},
-					{
-						from: platform() === "win32" ? resolve("engine", "build", dev ? "Debug" : "Release", "addon.node") : resolve("engine", "build", dev ? "Debug" : "Release", "addon.node"),
-						to: resolve(dist, "app", "addon.node"),
 					}
 				]
 			}),
@@ -79,6 +74,18 @@ const rendererConfig = (dev = false) =>
 			...base.resolve,
 			alias: {
 				engine: engine,
+			}
+		},
+		optimization: {
+			minimize: false,
+			splitChunks: {
+				cacheGroups: {
+					vendor: {
+						test: /[\\/]node_modules[\\/]/,
+						name: "vendors",
+						chunks: "all"
+					}
+				}
 			}
 		}
 	};

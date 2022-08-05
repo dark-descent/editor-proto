@@ -1,0 +1,19 @@
+.button {
+	padding: 6px 12px;
+	cursor: pointer;
+	transition: 60ms;
+	&:hover {
+		background-color: var(--sec-background);
+	}
+	&:active {
+		background-color: var(--tert-background);
+	}
+
+	&.transparent {
+		background-color: transparent;
+		border-color: transparent;
+	}
+	&:hover  {
+		background-color: var(--transparent);
+	}
+}
